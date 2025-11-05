@@ -2,6 +2,16 @@
 import React from "react";
 import type { RosterRow } from "@shared/src/rest/schema";
 import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
+import { 
+    Table,
+    TableHeader,
+    TableBody,
+    TableFooter,
+    TableRow,
+    TableHead,
+    TableCell,
+    TableCaption,
+} from "@shared/src/componets/UI/Table";
 
 type Props = {
   rows: RosterRow[] | null;
@@ -14,53 +24,53 @@ type Props = {
 export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: Props) {
   return (
     <div className="bg-white rounded-2xl shadow border overflow-auto">
-      <table className="min-w-full text-sm">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-3 py-2 text-left">Val</th>
-            <th className="px-3 py-2 text-left">Student</th>
-            <th className="px-3 py-2 text-left">Personnummer</th>
-            <th className="px-3 py-2 text-left">Canvas</th>
-            <th className="px-3 py-2 text-left">Ladok betyg</th>
-            <th className="px-3 py-2 text-left">Datum</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table className="min-w-full text-sm">
+        <TableHeader className="bg-gray-100">
+          <TableRow>
+            <TableHead className="px-3 py-2 text-left">Val</TableHead>
+            <TableHead className="px-3 py-2 text-left">Student</TableHead>
+            <TableHead className="px-3 py-2 text-left">Personnummer</TableHead>
+            <TableHead className="px-3 py-2 text-left">Canvas</TableHead>
+            <TableHead className="px-3 py-2 text-left">Ladok betyg</TableHead>
+            <TableHead className="px-3 py-2 text-left">Datum</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {(!rows || rows.length === 0) && (
-            <tr>
-              <td className="px-3 py-4 text-gray-500" colSpan={6}>
+            <TableRow>
+              <TableCell className="px-3 py-4 text-gray-500">
                 {loading ? "Laddar…" : "Ingen data – välj kurs/uppgift och ladda."}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           )}
           {rows?.map(r => (
-            <tr key={r.studentId} className="border-t align-top">
-              <td className="px-3 py-2">
+            <TableRow key={r.studentId} className="border-t align-top">
+              <TableCell className="px-3 py-2">
                 <input type="checkbox" checked={r.selected} onChange={()=>onToggle(r.studentId)} disabled={!r.personnummer}/>
-              </td>
-              <td className="px-3 py-2">
+              </TableCell>
+              <TableCell className="px-3 py-2">
                 <div className="font-medium">{r.name}</div>
                 <div className="text-xs text-gray-500">{r.studentId}</div>
-              </td>
-              <td className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</td>
-              <td className="px-3 py-2">{r.canvasOmdome ?? "-"}</td>
-              <td className="px-3 py-2">
+              </TableCell>
+              <TableCell className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</TableCell>
+              <TableCell className="px-3 py-2">{r.canvasOmdome ?? "-"}</TableCell>
+              <TableCell className="px-3 py-2">
                 <select className="border rounded-xl px-2 py-1"
                         value={r.ladokBetygPreselect ?? ""}
                         onChange={e=>onSetGrade(r.studentId, e.target.value)}>
                   <option value="">(välj)</option>
                   {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
-              </td>
-              <td className="px-3 py-2">
+              </TableCell>
+              <TableCell className="px-3 py-2">
                 <input type="date" className="border rounded-xl px-2 py-1"
                        value={r.datum}
                        onChange={e=>onSetDate(r.studentId, e.target.value)} />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
