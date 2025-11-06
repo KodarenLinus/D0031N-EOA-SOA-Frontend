@@ -13,6 +13,8 @@ import {
     TableCaption,
 } from "@shared/src/componets/UI/Table";
 import { Input } from "@shared/src/componets/UI/Input";
+import { Select } from "@shared/src/componets/UI/Select";
+import { Option } from "@shared/src/componets/UI/Option";
 
 type Props = {
   rows: RosterRow[] | null;
@@ -56,12 +58,12 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
               <TableCell className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</TableCell>
               <TableCell className="px-3 py-2">{r.canvasOmdome ?? "-"}</TableCell>
               <TableCell className="px-3 py-2">
-                <select className="border rounded-xl px-2 py-1"
+                <Select className="border rounded-xl px-2 py-1"
                         value={r.ladokBetygPreselect ?? ""}
                         onChange={e=>onSetGrade(r.studentId, e.target.value)}>
-                  <option value="">(välj)</option>
-                  {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                  <Option value="">(välj)</Option>
+                  {GRADE_OPTIONS.map(g => <Option key={g} value={g}>{g}</Option>)}
+                </Select>
               </TableCell>
               <TableCell className="px-3 py-2">
                 <Input type="date" className="border rounded-xl px-2 py-1"
