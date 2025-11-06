@@ -10,7 +10,7 @@ const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableE
   ({ className, ...props }, ref) => (
     <table
       ref={ref}
-      className={cn('w-full caption-bottom text-sm border-collapse', className)}
+      className={cn('w-full caption-bottom text-sm', className)}
       {...props}
     />
   )
@@ -32,7 +32,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes
   ({ className, ...props }, ref) => (
     <tbody
       ref={ref}
-      className={cn('divide-y', className)}
+      className={cn(className)}
       {...props}
     />
   )
@@ -54,7 +54,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <tr
       ref={ref}
-      className={cn('border-b transition-colors hover:bg-muted/50', className)}
+      className={cn('transition-colors hover:bg-muted/50', className)}
       {...props}
     />
   )

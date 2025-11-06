@@ -12,6 +12,9 @@ import {
     TableCell,
     TableCaption,
 } from "@shared/src/componets/UI/Table";
+import { Input } from "@shared/src/componets/UI/Input";
+import { Select } from "@shared/src/componets/UI/Select";
+import { Option } from "@shared/src/componets/UI/Option";
 
 type Props = {
   rows: RosterRow[] | null;
@@ -23,9 +26,9 @@ type Props = {
 
 export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: Props) {
   return (
-    <div className="bg-white rounded-2xl shadow border overflow-auto">
+    <div className="rounded-2xl shadow overflow-auto">
       <Table className="min-w-full text-sm">
-        <TableHeader className="bg-gray-100">
+        <TableHeader className="bg-cyan-100">
           <TableRow>
             <TableHead className="px-3 py-2 text-left">Val</TableHead>
             <TableHead className="px-3 py-2 text-left">Student</TableHead>
@@ -44,7 +47,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
             </TableRow>
           )}
           {rows?.map(r => (
-            <TableRow key={r.studentId} className="border-t align-top">
+            <TableRow key={r.studentId} className="align-top">
               <TableCell className="px-3 py-2">
                 <input type="checkbox" checked={r.selected} onChange={()=>onToggle(r.studentId)} disabled={!r.personnummer}/>
               </TableCell>
@@ -55,15 +58,15 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
               <TableCell className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</TableCell>
               <TableCell className="px-3 py-2">{r.canvasOmdome ?? "-"}</TableCell>
               <TableCell className="px-3 py-2">
-                <select className="border rounded-xl px-2 py-1"
+                <Select className="border rounded-xl px-2 py-1"
                         value={r.ladokBetygPreselect ?? ""}
                         onChange={e=>onSetGrade(r.studentId, e.target.value)}>
-                  <option value="">(välj)</option>
-                  {GRADE_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
+                  <Option value="">(välj)</Option>
+                  {GRADE_OPTIONS.map(g => <Option key={g} value={g}>{g}</Option>)}
+                </Select>
               </TableCell>
               <TableCell className="px-3 py-2">
-                <input type="date" className="border rounded-xl px-2 py-1"
+                <Input type="date" className="border rounded-xl px-2 py-1"
                        value={r.datum}
                        onChange={e=>onSetDate(r.studentId, e.target.value)} />
               </TableCell>

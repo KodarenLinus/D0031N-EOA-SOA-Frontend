@@ -1,6 +1,10 @@
 "use client";
 import React from "react";
 import type { Assignment } from "@shared/src/rest/schema";
+import { Input } from "@shared/src/componets/UI/Input";
+import { Button } from "@shared/src/componets/UI/Button";
+import { Header } from "@shared/src/componets/UI/Header";
+import { Label } from "@shared/src/componets/UI/Label";
 
 type Props = {
   apiLabel: string;
@@ -29,24 +33,10 @@ export function Filters({
 }: Props) {
   return (
     <>
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-white/70 backdrop-blur mb-6">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-white">
-              CL
-            </div>
-            <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
-              Canvas
-            </h1>
-          </div>
-        </div>
-      </header>
-
       {/* Card */}
       <div className="mx-auto max-w-6xl">
-        <div className="rounded-2xl border bg-white shadow-sm">
-          <div className="border-b px-5 py-4">
+        <div className="rounded-2xl bg-white-100 shadow-sm">
+          <div className="px-5 py-4 bg-cyan-100 rounded-t-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold">Filter</h2>
@@ -54,26 +44,26 @@ export function Filters({
                   Välj kurs, uppgift och modul innan import/export.
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={onReload}
-                className="inline-flex items-center gap-2 rounded-xl border bg-black px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 active:opacity-80"
+                className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 active:opacity-80"
               >
                 Ladda om
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className="grid gap-4 px-5 py-5 sm:grid-cols-4">
             {/* Kurskod */}
             <div className="sm:col-span-1">
-              <label
+              <Label
                 htmlFor="kurskod"
                 className="mb-1 block text-xs font-medium text-gray-700"
               >
                 Kurskod
-              </label>
-              <input
+              </Label>
+              <Input
                 id="kurskod"
                 className="w-full rounded-xl border px-3 py-2 text-sm shadow-sm outline-none transition placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
                 value={kurskod}
@@ -85,16 +75,16 @@ export function Filters({
 
             {/* Canvas-uppgift */}
             <div className="sm:col-span-2">
-              <label
+              <Label
                 htmlFor="assignment"
                 className="mb-1 block text-xs font-medium text-gray-700"
               >
                 Canvas-uppgift
-              </label>
+              </Label>
               <div className="relative">
                 <select
                   id="assignment"
-                  className="w-full appearance-none rounded-xl border px-3 py-2 pr-9 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
+                  className="w-full appearance-none rounded-xl border px-3 py-2 pr-6 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
                   value={assignmentId ?? ""}
                   onChange={(e) =>
                     setAssignmentId(
@@ -127,13 +117,13 @@ export function Filters({
 
             {/* Ladok-modul */}
             <div className="sm:col-span-1">
-              <label
+              <Label
                 htmlFor="module"
                 className="mb-1 block text-xs font-medium text-gray-700"
               >
                 Ladok-modul
-              </label>
-              <input
+              </Label>
+              <Input
                 id="module"
                 className="w-full rounded-xl border px-3 py-2 text-sm shadow-sm outline-none transition placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
                 value={modulKod}
