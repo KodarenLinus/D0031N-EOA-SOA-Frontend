@@ -2,8 +2,8 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { getApiBase } from "@shared/src/rest/fetch";
 import { useAssignments, useRoster, useBulkRegister, rowsToLadokPayloads } from "@shared/src/rest/hooks";
-import { Filters } from "@shared/src/componets/roster/filters";
-import { RosterTable } from "@shared/src/componets/roster/rosterTable";
+import { Filters } from "@src/app/Canvas/filters";
+import { RosterTable } from "@src/app/Canvas/rosterTable";
 
 export default function CanvasRosterToLadok() {
   const API = useMemo(() => getApiBase(), []);
