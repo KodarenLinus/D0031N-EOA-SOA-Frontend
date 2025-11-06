@@ -1,9 +1,16 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import { getApiBase } from "@shared/src/rest/fetch";
-import { useAssignments, useRoster, useBulkRegister, rowsToLadokPayloads } from "@shared/src/rest/hooks";
+import { 
+  useAssignments, 
+  useRoster, 
+  useBulkRegister, 
+  rowsToLadokPayloads 
+} from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
+import { Header } from "@shared/src/componets/UI/Header";
+import { Button } from "@shared/src/componets/UI/Button";
 
 export default function CanvasRosterToLadok() {
   const API = useMemo(() => getApiBase(), []);
@@ -13,8 +20,7 @@ export default function CanvasRosterToLadok() {
 
   // data hooks
   const { assignments, error: assignErr, reload: reloadAssignments } = useAssignments(kurskod);
-  const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } =
-    useRoster(kurskod, assignmentId);
+  const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } = useRoster(kurskod, assignmentId);
 
   // set default assignment when list loads
   useEffect(() => {
@@ -38,21 +44,37 @@ export default function CanvasRosterToLadok() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Filters
-        apiLabel={API}
-        kurskod={kurskod}
-        setKurskod={setKurskod}
-        modulKod={modulKod}
-        setModulKod={setModulKod}
-        assignments={assignments}
-        assignmentId={assignmentId}
-        setAssignmentId={setAssignmentId}
-        onReload={onReloadAll}
-        error={assignErr || rosterErr}
-      />
+    <div className="min-h-screen">
+      {/* Header */}
+      <Header>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-blue-400">
+              CA
+            </div>
+            <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
+              Canvas
+            </h1>
+          </div>
+        </div>
+      </Header>
 
-      <main className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+      <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
+         <Filters
+          apiLabel={API}
+          kurskod={kurskod}
+          setKurskod={setKurskod}
+          modulKod={modulKod}
+          setModulKod={setModulKod}
+          assignments={assignments}
+          assignmentId={assignmentId}
+          setAssignmentId={setAssignmentId}
+          onReload={onReloadAll}
+          error={assignErr || rosterErr}
+        />
+      </div>
+     
+      <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <RosterTable
           rows={rows}
           loading={loading}
@@ -62,16 +84,16 @@ export default function CanvasRosterToLadok() {
         />
 
         <div className="flex items-center gap-3">
-          <button
-            className="rounded-2xl px-4 py-2 shadow-sm border bg-black text-white hover:opacity-90 disabled:opacity-50"
+          <Button
+            className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-90 disabled:opacity-50"
             onClick={onRegisterSelected}
             disabled={busy || !rows?.some(r => r.selected)}
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
-          </button>
+          </Button>
           {message && <span className="text-sm text-green-700">{message}</span>}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
