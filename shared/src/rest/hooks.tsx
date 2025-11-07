@@ -1,18 +1,51 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CanvasApi } from "./canvas";
+import { StudentITSApi } from "./studentits";
 import { LadokApi, LadokRegisterBody } from "./ladok";
-import type { Assignment, RosterItem, RosterRow } from "./schema";
+import { EpokApi } from "./epok";
+import type { Assignment, RosterItem, EpokModule, RosterRow } from "./schema";
 
 // Grades you allow in UI (reusable)
-export const GRADE_OPTIONS = ["A","B","C","D","E","F","G","U"] as const;
+export const GRADE_OPTIONS = ["U","G","VG"] as const;
 
-/** Assignments for a course code */
+/** 🔹 Epok: moduler för en kurskod */
+export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
+  const [modules, setModules] = useState<EpokModule[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const reload = useCallback(async () => {
+    if (!kurskod) { setModules([]); return; }
+    setLoading(true); setError(null);
+    try {
+      const data = await EpokApi.listModules(kurskod, onlyActive);
+      setModules(data);
+    } catch (e: any) {
+      setError(e.message || "Kunde inte hämta Epok-moduler");
+    } finally {
+      setLoading(false);
+    }
+  }, [kurskod, onlyActive]);
+
+  useEffect(() => { reload(); }, [reload]);
+
+  const modulesByCode = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const mod of modules) m.set(mod.modulkod, mod.namn);
+    return m;
+  }, [modules]);
+
+  return { modules, modulesByCode, loading, error, reload };
+}
+
+/** Assignments for a course code (Canvas) */
 export function useAssignments(kurskod: string) {
   const [data, setData] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
+    if (!kurskod) { setData([]); return; }
     setLoading(true); setError(null);
     try {
       const res = await CanvasApi.listAssignments(kurskod);
@@ -34,7 +67,7 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
-    if (!assignmentId) { setRows(null); return; }
+    if (!kurskod || !assignmentId) { setRows(null); return; }
     setLoading(true); setError(null);
 
     try {
@@ -44,7 +77,7 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
       const pairs = await Promise.all(
         roster.map(async r => {
           try {
-            const dto = await CanvasApi.getPersonnummer(r.studentId);
+            const dto = await StudentITSApi.getPersonnummer(r.studentId);
             return [r.studentId, dto.personnummer] as const;
           } catch {
             return [r.studentId, null] as const;

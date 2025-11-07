@@ -3,6 +3,13 @@ export const getApiBase = () =>
 
 export async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, cache: "no-store" });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
+  if (!res.ok) {
+    let msg = `${res.status} ${res.statusText}`;
+    try {
+      const text = await res.text();
+      if (text) msg += `: ${text}`;
+    } catch {}
+    throw new Error(msg);
+  }
+  return res.json() as Promise<T>;
 }
