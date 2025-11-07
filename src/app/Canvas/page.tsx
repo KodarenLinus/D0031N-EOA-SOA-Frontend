@@ -6,7 +6,7 @@ import {
   useRoster,
   useBulkRegister,
   rowsToLadokPayloads,
-  useEpokModules,               // ⬅️ NYTT
+  useEpokModules,               
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
@@ -16,7 +16,7 @@ import { Button } from "@shared/src/componets/UI/Button";
 export default function CanvasRosterToLadok() {
   const API = useMemo(() => getApiBase(), []);
   const [kurskod, setKurskod] = useState("D0031N");
-  const [modulKod, setModulKod] = useState("");          // ⬅️ tom, sätts via Epok
+  const [modulKod, setModulKod] = useState("");        
   const [assignmentId, setAssignmentId] = useState<number | null>(null);
 
   // data hooks

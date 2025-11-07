@@ -50,9 +50,9 @@ export type LadokSubmitResponse = {
 export type LadokRegisterBody = {
   personnummer: string;
   kurskod: string;
-  modul: string;      // UI kallar den 'modul'
-  datum: string;      // YYYY-MM-DD
-  betyg: string;      // "G" | "VG" | ...
+  modulkod: string;     
+  datum: string;      
+  betyg: string;      
 };
 
 // --- Epok domain types ---

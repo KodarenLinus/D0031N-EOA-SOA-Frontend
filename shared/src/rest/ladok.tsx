@@ -1,14 +1,8 @@
 import { getApiBase } from "./fetch";
+import { LadokRegisterBody } from "./schema";
 
 const API = () => getApiBase();
 
-export type LadokRegisterBody = {
-  personnummer: string;
-  kurskod: string;
-  modul: string;
-  datum: string;
-  betyg: string;
-};
 
 export const LadokApi = {
   registerResult: async (payload: LadokRegisterBody) => {

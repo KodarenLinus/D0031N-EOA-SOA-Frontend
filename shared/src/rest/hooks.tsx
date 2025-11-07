@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CanvasApi } from "./canvas";
 import { StudentITSApi } from "./studentits";
-import { LadokApi, LadokRegisterBody } from "./ladok";
+import { LadokApi } from "./ladok";
 import { EpokApi } from "./epok";
-import type { Assignment, RosterItem, EpokModule, RosterRow } from "./schema";
+import type { Assignment, RosterItem, EpokModule, RosterRow, LadokRegisterBody} from "./schema";
 
 // Grades you allow in UI (reusable)
 export const GRADE_OPTIONS = ["U","G","VG"] as const;
@@ -145,13 +145,13 @@ export function useBulkRegister() {
 }
 
 /** Helper to assemble Ladok payloads from rows */
-export function rowsToLadokPayloads(rows: RosterRow[], kurskod: string, modul: string) {
+export function rowsToLadokPayloads(rows: RosterRow[], kurskod: string, modulkod: string) {
   return rows
     .filter(r => r.selected && r.personnummer && (r.ladokBetygPreselect || r.canvasOmdome))
     .map(r => ({
       personnummer: r.personnummer!,
       kurskod,
-      modul,
+      modulkod,
       datum: r.datum,
       betyg: r.ladokBetygPreselect || r.canvasOmdome || "",
     }));

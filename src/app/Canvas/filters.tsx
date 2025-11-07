@@ -21,8 +21,8 @@ type Props = {
   onReload: () => void;
   error?: string | null;
 
-  epokModules: EpokModule[];          // ⬅️ NYTT
-  epokLoading?: boolean;              // ⬅️ NYTT
+  epokModules: EpokModule[];     
+  epokLoading?: boolean;              
 };
 
 export function Filters({
