@@ -3,12 +3,22 @@ import { CanvasApi } from "./canvas";
 import { StudentITSApi } from "./studentits";
 import { LadokApi } from "./ladok";
 import { EpokApi } from "./epok";
-import type { Assignment, RosterItem, EpokModule, RosterRow, LadokRegisterBody} from "./schema";
+import type { 
+  Assignment, 
+  EpokModule, 
+  RosterRow, 
+  LadokRegisterBody
+} from "./schema";
 
 // Grades you allow in UI (reusable)
 export const GRADE_OPTIONS = ["U","G","VG"] as const;
 
-/** 🔹 Epok: moduler för en kurskod */
+/**
+ * Epok modules for a course code (Epok)
+ * @param kurskod - The course code
+ * @param onlyActive - Whether to fetch only active modules
+ * @return modules, loading, error, reload, modulesByCode
+ */
 export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
   const [modules, setModules] = useState<EpokModule[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +48,11 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
   return { modules, modulesByCode, loading, error, reload };
 }
 
-/** Assignments for a course code (Canvas) */
+/**
+ * Assignments for a course code (Canvas)
+ * @param kurskod - The course code
+ * @returns assignments, loading, error, reload
+ */
 export function useAssignments(kurskod: string) {
   const [data, setData] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +74,12 @@ export function useAssignments(kurskod: string) {
   return { assignments: data, loading, error, reload };
 }
 
-/** Roster + personnummer enrichment, returns UI-ready rows */
+/**
+ * Roster + personnummer enrichment, returns UI-ready rows
+ * @param kurskod - The course code
+ * @param assignmentId - The assignment ID
+ * @returns rows, loading, error, reload, toggleRow, setGrade, setDate
+ */
 export function useRoster(kurskod: string, assignmentId: number | null) {
   const [rows, setRows] = useState<RosterRow[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -73,7 +92,6 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
     try {
       const roster = await CanvasApi.listRosterWithGrades(kurskod, assignmentId);
 
-      // fetch personnummer in parallel
       const pairs = await Promise.all(
         roster.map(async r => {
           try {
@@ -108,10 +126,12 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
     setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, selected: !r.selected } : r) ?? prev)
   , []);
 
+  // set grade for a student
   const setGrade = useCallback((studentId: string, grade: string) =>
     setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, ladokBetygPreselect: grade } : r) ?? prev)
   , []);
 
+  // set date for a student
   const setDate = useCallback((studentId: string, date: string) =>
     setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, datum: date } : r) ?? prev)
   , []);
@@ -119,7 +139,10 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
   return { rows, loading, error, reload, toggleRow, setGrade, setDate, setRows };
 }
 
-/** Bulk register (reusable anywhere) */
+/**
+ * Bulk register (reusable anywhere)
+ * @returns 
+ */
 export function useBulkRegister() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -144,7 +167,11 @@ export function useBulkRegister() {
   return { register, busy, message, setMessage };
 }
 
-/** Helper to assemble Ladok payloads from rows */
+/**
+ * Convert roster rows to Ladok payloads
+ * @param rows - The roster rows
+ * @param kurskod - The course code
+ */
 export function rowsToLadokPayloads(rows: RosterRow[], kurskod: string, modulkod: string) {
   return rows
     .filter(r => r.selected && r.personnummer && (r.ladokBetygPreselect || r.canvasOmdome))

@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 import type { RosterRow } from "@shared/src/rest/schema";
 import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
 import { 

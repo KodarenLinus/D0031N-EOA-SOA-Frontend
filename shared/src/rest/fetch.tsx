@@ -1,3 +1,6 @@
+/**
+ * Rest utility functions
+ */
 export const getApiBase = () =>
   (process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") || "http://localhost:8080");
 

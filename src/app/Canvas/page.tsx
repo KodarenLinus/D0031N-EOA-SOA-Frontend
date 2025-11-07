@@ -1,6 +1,5 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
-import { getApiBase } from "@shared/src/rest/fetch";
+import { useState, useEffect } from "react";
 import {
   useAssignments,
   useRoster,
@@ -14,20 +13,16 @@ import { Header } from "@shared/src/componets/UI/Header";
 import { Button } from "@shared/src/componets/UI/Button";
 
 export default function CanvasRosterToLadok() {
-  const API = useMemo(() => getApiBase(), []);
   const [kurskod, setKurskod] = useState("D0031N");
   const [modulKod, setModulKod] = useState("");        
   const [assignmentId, setAssignmentId] = useState<number | null>(null);
 
-  // data hooks
   const { assignments, error: assignErr, reload: reloadAssignments } = useAssignments(kurskod);
   const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } =
     useRoster(kurskod, assignmentId);
 
-  // Epok moduler
   const { modules: epokModules, loading: epokLoading } = useEpokModules(kurskod, true);
 
-  // default val: första assignment och första modul när listor finns
   useEffect(() => {
     if (!assignmentId && assignments.length > 0) {
       setAssignmentId(assignments[0].id);
@@ -56,7 +51,6 @@ export default function CanvasRosterToLadok() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <Header>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -67,10 +61,8 @@ export default function CanvasRosterToLadok() {
           </div>
         </div>
       </Header>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
-          apiLabel={API}
           kurskod={kurskod}
           setKurskod={setKurskod}
           modulKod={modulKod}
@@ -80,8 +72,8 @@ export default function CanvasRosterToLadok() {
           setAssignmentId={setAssignmentId}
           onReload={onReloadAll}
           error={assignErr || rosterErr}
-          epokModules={epokModules}          // ⬅️ NYTT
-          epokLoading={epokLoading}          // ⬅️ NYTT
+          epokModules={epokModules}        
+          epokLoading={epokLoading}         
         />
       </div>
 

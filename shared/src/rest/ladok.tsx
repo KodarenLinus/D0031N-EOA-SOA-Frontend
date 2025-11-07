@@ -1,8 +1,9 @@
 import { getApiBase } from "./fetch";
 import { LadokRegisterBody } from "./schema";
-
+/**
+ * Ladok REST-klient
+ */
 const API = () => getApiBase();
-
 
 export const LadokApi = {
   registerResult: async (payload: LadokRegisterBody) => {

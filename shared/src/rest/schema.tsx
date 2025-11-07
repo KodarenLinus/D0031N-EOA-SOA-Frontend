@@ -1,20 +1,35 @@
-// --- Canvas & Ladok domain types ---
+/**
+ * Canvas Schema types
+ */
+// --- Canvas assignment type ---
 export type Assignment = {
   id: number;
   name: string;
   scaleHint?: string | null;
   type?: string | null;
 };
-
+// --- Canvas roster item type ---
 export type RosterItem = {
-  studentId: string;            // backend aliasar CAST(id AS varchar)
+  studentId: string;          
   name: string;
-  email?: string | null;        // ej använd i prototypen
-  canvasGrade?: string | null;  // betyg i Canvas om satt
-  gradedAt?: string | null;     // ISO
+  email?: string | null;        
+  canvasGrade?: string | null;  
+  gradedAt?: string | null;    
+
+};
+// --- Canvas assignments response ---
+export type CanvasAssignmentsResponse = {
+  assignments: Assignment[];
+};
+// --- Canvas roster response ---
+export type CanvasRosterResponse = {
+  roster: RosterItem[];
 };
 
-// Rad för tabellen i UI
+/**
+ * UI-ready roster row
+ */
+// --- Roster table row ---
 export type RosterRow = {
   studentId: string;
   name: string;
@@ -24,28 +39,23 @@ export type RosterRow = {
   ladokBetygPreselect: string | null;
   selected: boolean;
 };
-
+// --- Roster table data ---
 export type RosterTableData = RosterRow[];
 
-// --- API response wrappers (om du vill ha v2/wrapped endpoints) ---
-export type CanvasAssignmentsResponse = {
-  assignments: Assignment[];
-};
-
-export type CanvasRosterResponse = {
-  roster: RosterItem[];
-};
-
+/**
+ * Ladok Schema types
+ * 
+ */
+// --- Ladok grades response
 export type LadokGradesResponse = {
   grades: { [studentId: string]: string | null };
 };
-
+// --- Ladok submit response ---
 export type LadokSubmitResponse = {
   success: boolean;
   message: string;
   resultatId?: number | null;
 };
-
 // --- Ladok submit body ---
 export type LadokRegisterBody = {
   personnummer: string;
@@ -54,7 +64,9 @@ export type LadokRegisterBody = {
   datum: string;      
   betyg: string;      
 };
-
+/**
+ * Epok Schema types
+ */
 // --- Epok domain types ---
 export type EpokModule = {
   modulkod: string;

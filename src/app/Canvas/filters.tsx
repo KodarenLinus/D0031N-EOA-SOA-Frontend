@@ -7,26 +7,20 @@ import { Label } from "@shared/src/componets/UI/Label";
 import { Select } from "@shared/src/componets/UI/Select";
 
 type Props = {
-  apiLabel: string;
   kurskod: string;
   setKurskod: (v: string) => void;
-
   modulKod: string;
   setModulKod: (v: string) => void;
-
   assignments: Assignment[];
   assignmentId: number | null;
   setAssignmentId: (v: number | null) => void;
-
   onReload: () => void;
   error?: string | null;
-
   epokModules: EpokModule[];     
   epokLoading?: boolean;              
 };
 
 export function Filters({
-  apiLabel,
   kurskod,
   setKurskod,
   modulKod,
