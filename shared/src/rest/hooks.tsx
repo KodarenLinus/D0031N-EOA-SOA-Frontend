@@ -49,48 +49,22 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
 }
 
 /**
- * Assignments for a course code (Canvas)
- * @param kurskod - The course code
- * @returns assignments, loading, error, reload
- */
-export function useAssignments(kurskod: string) {
-  const [data, setData] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const reload = useCallback(async () => {
-    if (!kurskod) { setData([]); return; }
-    setLoading(true); setError(null);
-    try {
-      const res = await CanvasApi.listAssignments(kurskod);
-      setData(res);
-    } catch (e: any) {
-      setError(e.message);
-    } finally { setLoading(false); }
-  }, [kurskod]);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  return { assignments: data, loading, error, reload };
-}
-
-/**
  * Roster + personnummer enrichment, returns UI-ready rows
  * @param kurskod - The course code
  * @param assignmentId - The assignment ID
  * @returns rows, loading, error, reload, toggleRow, setGrade, setDate
  */
-export function useRoster(kurskod: string, assignmentId: number | null) {
+export function useRoster(kurskod: string) {
   const [rows, setRows] = useState<RosterRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
-    if (!kurskod || !assignmentId) { setRows(null); return; }
+    if (!kurskod) { setRows(null); return; }
     setLoading(true); setError(null);
 
     try {
-      const roster = await CanvasApi.listRosterWithGrades(kurskod, assignmentId);
+      const roster = await CanvasApi.listRoster(kurskod);
 
       const pairs = await Promise.all(
         roster.map(async r => {
@@ -109,9 +83,8 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
         studentId: r.studentId,
         name: r.name || r.studentId,
         personnummer: pnrMap.get(r.studentId) ?? null,
-        canvasOmdome: r.canvasGrade ?? null,
         datum: today,
-        ladokBetygPreselect: r.canvasGrade ?? null,
+        ladokBetygPreselect: null,
         selected: !!pnrMap.get(r.studentId),
       }));
 
@@ -119,7 +92,7 @@ export function useRoster(kurskod: string, assignmentId: number | null) {
     } catch (e: any) {
       setError(e.message);
     } finally { setLoading(false); }
-  }, [kurskod, assignmentId]);
+  }, [kurskod]);
 
   // local row mutators (stable fns)
   const toggleRow = useCallback((studentId: string) =>
@@ -174,12 +147,12 @@ export function useBulkRegister() {
  */
 export function rowsToLadokPayloads(rows: RosterRow[], kurskod: string, modulkod: string) {
   return rows
-    .filter(r => r.selected && r.personnummer && (r.ladokBetygPreselect || r.canvasOmdome))
+    .filter(r => r.selected && r.personnummer && (r.ladokBetygPreselect))
     .map(r => ({
       personnummer: r.personnummer!,
       kurskod,
       modulkod,
       datum: r.datum,
-      betyg: r.ladokBetygPreselect || r.canvasOmdome || "",
+      betyg: r.ladokBetygPreselect || "",
     }));
 }

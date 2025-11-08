@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  useAssignments,
   useRoster,
   useBulkRegister,
   rowsToLadokPayloads,
@@ -15,19 +14,11 @@ import { Button } from "@shared/src/componets/UI/Button";
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("D0031N");
   const [modulKod, setModulKod] = useState("");        
-  const [assignmentId, setAssignmentId] = useState<number | null>(null);
 
-  const { assignments, error: assignErr, reload: reloadAssignments } = useAssignments(kurskod);
   const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } =
-    useRoster(kurskod, assignmentId);
+    useRoster(kurskod);
 
   const { modules: epokModules, loading: epokLoading } = useEpokModules(kurskod, true);
-
-  useEffect(() => {
-    if (!assignmentId && assignments.length > 0) {
-      setAssignmentId(assignments[0].id);
-    }
-  }, [assignments, assignmentId]);
 
   useEffect(() => {
     if (!modulKod && epokModules.length > 0) {
@@ -36,11 +27,6 @@ export default function CanvasRosterToLadok() {
   }, [epokModules, modulKod]);
 
   const { register, busy, message, setMessage } = useBulkRegister();
-
-  const onReloadAll = () => {
-    reloadAssignments();
-    if (assignmentId) reloadRoster();
-  };
 
   const onRegisterSelected = async () => {
     if (!rows || !modulKod) return;
@@ -67,11 +53,7 @@ export default function CanvasRosterToLadok() {
           setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          assignments={assignments}
-          assignmentId={assignmentId}
-          setAssignmentId={setAssignmentId}
-          onReload={onReloadAll}
-          error={assignErr || rosterErr}
+          onReload={reloadRoster}
           epokModules={epokModules}        
           epokLoading={epokLoading}         
         />

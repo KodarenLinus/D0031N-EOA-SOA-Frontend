@@ -12,10 +12,6 @@ export type Assignment = {
 export type RosterItem = {
   studentId: string;          
   name: string;
-  email?: string | null;        
-  canvasGrade?: string | null;  
-  gradedAt?: string | null;    
-
 };
 // --- Canvas assignments response ---
 export type CanvasAssignmentsResponse = {
@@ -34,7 +30,6 @@ export type RosterRow = {
   studentId: string;
   name: string;
   personnummer: string | null;
-  canvasOmdome: string | null;
   datum: string;                 // YYYY-MM-DD
   ladokBetygPreselect: string | null;
   selected: boolean;

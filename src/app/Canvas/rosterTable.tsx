@@ -55,7 +55,6 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                 <div className="text-xs text-gray-500">{r.studentId}</div>
               </TableCell>
               <TableCell className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</TableCell>
-              <TableCell className="px-3 py-2">{r.canvasOmdome ?? "-"}</TableCell>
               <TableCell className="px-3 py-2">
                 <Select className="border rounded-xl px-2 py-1"
                         value={r.ladokBetygPreselect ?? ""}
