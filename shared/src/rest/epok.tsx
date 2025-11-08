@@ -1,6 +1,8 @@
 import { jsonFetch, getApiBase } from "./fetch";
 import type { EpokModule } from "./schema";
-
+/**
+ * Epok REST-klient
+ */
 const API = () => getApiBase();
 
 export const EpokApi = {

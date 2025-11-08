@@ -1,22 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CanvasApi } from "./canvas";
 import { StudentITSApi } from "./studentits";
-import { LadokApi, LadokRegisterBody } from "./ladok";
+import { LadokApi } from "./ladok";
 import { EpokApi } from "./epok";
-import type { Assignment, RosterItem, EpokModule, RosterRow } from "./schema";
+import type {
+  EpokModule,
+  RosterRow,
+  LadokResultRequestDto,
+  LadokRosterItemDto,
+} from "./schema";
 
 // Grades you allow in UI (reusable)
-export const GRADE_OPTIONS = ["U","G","VG"] as const;
+export const GRADE_OPTIONS = ["U", "G", "VG"] as const;
 
-/** 🔹 Epok: moduler för en kurskod */
+/**
+ * Epok modules for a course code (Epok)
+ */
 export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
   const [modules, setModules] = useState<EpokModule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
-    if (!kurskod) { setModules([]); return; }
-    setLoading(true); setError(null);
+    if (!kurskod) {
+      setModules([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
     try {
       const data = await EpokApi.listModules(kurskod, onlyActive);
       setModules(data);
@@ -27,7 +38,9 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     }
   }, [kurskod, onlyActive]);
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   const modulesByCode = useMemo(() => {
     const m = new Map<string, string>();
@@ -38,100 +51,135 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
   return { modules, modulesByCode, loading, error, reload };
 }
 
-/** Assignments for a course code (Canvas) */
-export function useAssignments(kurskod: string) {
-  const [data, setData] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const reload = useCallback(async () => {
-    if (!kurskod) { setData([]); return; }
-    setLoading(true); setError(null);
-    try {
-      const res = await CanvasApi.listAssignments(kurskod);
-      setData(res);
-    } catch (e: any) {
-      setError(e.message);
-    } finally { setLoading(false); }
-  }, [kurskod]);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  return { assignments: data, loading, error, reload };
-}
-
-/** Roster + personnummer enrichment, returns UI-ready rows */
-export function useRoster(kurskod: string, assignmentId: number | null) {
+/**
+ * Roster (från Ladok) + ev. enrich från Canvas/StudentITS.
+ * Returnerar UI-klara rader inkl. sent/ladokStatus.
+ */
+export function useRoster(kurskod: string, modulkod: string) {
   const [rows, setRows] = useState<RosterRow[] | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
-    if (!kurskod || !assignmentId) { setRows(null); return; }
-    setLoading(true); setError(null);
+    if (!kurskod || !modulkod) {
+      setRows(null);
+      return;
+    }
+    setLoading(true);
+    setError(null);
 
     try {
-      const roster = await CanvasApi.listRosterWithGrades(kurskod, assignmentId);
+      const ladokRoster = await LadokApi.getRoster(kurskod, modulkod);
+      let canvasByPnr = new Map<string, string>();
+      try {
+        const canvas = await CanvasApi.listRoster(kurskod);
+        canvasByPnr = new Map(
+          canvas
+            .filter((c: any) => !!c.personnummer && !!c.name)
+            .map((c: any) => [c.personnummer as string, c.name as string])
+        );
+      } catch {
+        // ignore canvas errors
+      }
 
-      // fetch personnummer in parallel
-      const pairs = await Promise.all(
-        roster.map(async r => {
-          try {
-            const dto = await StudentITSApi.getPersonnummer(r.studentId);
-            return [r.studentId, dto.personnummer] as const;
-          } catch {
-            return [r.studentId, null] as const;
-          }
-        })
-      );
-      const pnrMap = new Map(pairs);
-      const today = new Date().toISOString().slice(0,10);
+      const today = new Date().toISOString().slice(0, 10);
 
-      const table: RosterRow[] = roster.map(r => ({
-        studentId: r.studentId,
-        name: r.name || r.studentId,
-        personnummer: pnrMap.get(r.studentId) ?? null,
-        canvasOmdome: r.canvasGrade ?? null,
-        datum: today,
-        ladokBetygPreselect: r.canvasGrade ?? null,
-        selected: !!pnrMap.get(r.studentId),
-      }));
+      const table: RosterRow[] = (ladokRoster as LadokRosterItemDto[]).map((dto) => {
+        const fullName =
+          canvasByPnr.get(dto.personnummer ?? "") ||
+          [dto.fornamn, dto.efternamn].filter(Boolean).join(" ").trim() ||
+          dto.personnummer ||
+          "";
+
+        const sent =
+          !!(dto as any).sent ||
+          dto.ladokStatus?.toLowerCase() === "registrerad" ||
+          Boolean(dto.registeredAt);
+
+        return {
+          studentId: dto.personnummer ?? dto.kurstillfalleId.toString(),
+          name: fullName,
+          personnummer: dto.personnummer ?? null,
+          datum: dto.registeredAt ? dto.registeredAt.slice(0, 10) : today,
+          ladokBetygPreselect: dto.ladokBetyg ?? null,
+          selected: false, 
+          sent,
+          ladokStatus: dto.ladokStatus ?? null,
+          registeredAt: dto.registeredAt ?? null,
+        } as RosterRow;
+      });
 
       setRows(table);
     } catch (e: any) {
-      setError(e.message);
-    } finally { setLoading(false); }
-  }, [kurskod, assignmentId]);
+      setError(e.message || "Kunde inte hämta roster");
+    } finally {
+      setLoading(false);
+    }
+  }, [kurskod, modulkod]);
 
-  // local row mutators (stable fns)
-  const toggleRow = useCallback((studentId: string) =>
-    setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, selected: !r.selected } : r) ?? prev)
-  , []);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
-  const setGrade = useCallback((studentId: string, grade: string) =>
-    setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, ladokBetygPreselect: grade } : r) ?? prev)
-  , []);
+  const toggleRow = useCallback(
+    (studentId: string) =>
+      setRows((prev) =>
+        prev?.map((r) =>
+          r.studentId === studentId ? { ...r, selected: !r.selected } : r
+        ) ?? prev
+      ),
+    []
+  );
 
-  const setDate = useCallback((studentId: string, date: string) =>
-    setRows(prev => prev?.map(r => r.studentId === studentId ? { ...r, datum: date } : r) ?? prev)
-  , []);
+  const setGrade = useCallback(
+    (studentId: string, grade: string) =>
+      setRows((prev) =>
+        prev?.map((r) =>
+          r.studentId === studentId ? { ...r, ladokBetygPreselect: grade } : r
+        ) ?? prev
+      ),
+    []
+  );
+
+  const setDate = useCallback(
+    (studentId: string, date: string) =>
+      setRows((prev) =>
+        prev?.map((r) =>
+          r.studentId === studentId ? { ...r, datum: date } : r
+        ) ?? prev
+      ),
+    []
+  );
 
   return { rows, loading, error, reload, toggleRow, setGrade, setDate, setRows };
 }
 
-/** Bulk register (reusable anywhere) */
+/**
+ * Bulk register – anropar LadokApi.postResult för varje payload.
+ * Returnerar summering (ok/fail) och meddelande.
+ */
 export function useBulkRegister() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const register = useCallback(async (payloads: LadokRegisterBody[]) => {
-    setBusy(true); setMessage(null);
-    let ok = 0, fail = 0;
+  const register = useCallback(async (payloads: LadokResultRequestDto[]) => {
+    setBusy(true);
+    setMessage(null);
+    let ok = 0,
+      fail = 0;
 
     for (const body of payloads) {
       try {
-        await LadokApi.registerResult(body);
-        ok++;
+        const res = await LadokApi.postResult(body);
+        if (
+          res.status.toLowerCase() === "registrerad" ||
+          /redan/i.test(res.message)
+        ) {
+          ok++;
+        } else {
+          fail++;
+        }
       } catch {
         fail++;
       }
@@ -144,15 +192,23 @@ export function useBulkRegister() {
   return { register, busy, message, setMessage };
 }
 
-/** Helper to assemble Ladok payloads from rows */
-export function rowsToLadokPayloads(rows: RosterRow[], kurskod: string, modul: string) {
+/**
+ * Konverterar UI-rader till Ladok-payloads (skickar inte redan skickade).
+ */
+export function rowsToLadokPayloads(
+  rows: RosterRow[],
+  kurskod: string,
+  modulkod: string
+): LadokResultRequestDto[] {
   return rows
-    .filter(r => r.selected && r.personnummer && (r.ladokBetygPreselect || r.canvasOmdome))
-    .map(r => ({
+    .filter(
+      (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !r.sent
+    )
+    .map((r) => ({
       personnummer: r.personnummer!,
       kurskod,
-      modul,
+      modulkod,
       datum: r.datum,
-      betyg: r.ladokBetygPreselect || r.canvasOmdome || "",
+      betyg: r.ladokBetygPreselect!,
     }));
 }

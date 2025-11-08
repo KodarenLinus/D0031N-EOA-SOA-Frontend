@@ -1,11 +1,10 @@
 import { jsonFetch, getApiBase } from "./fetch";
 import type { Assignment, RosterItem } from "./schema";
-
+/**
+ * StudentITS REST-klient
+ */
 const API = () => getApiBase();
 
-/**
- * Canvas REST-klient (matchar våra Spring controllers)
- */
 export const StudentITSApi = {
     
     getPersonnummer: (anvandarnamn: string) =>
