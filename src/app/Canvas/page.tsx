@@ -56,14 +56,13 @@ export default function CanvasRosterToLadok() {
       <Header>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-blue-400">
+            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-cyan-100">
               CA
             </div>
             <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Canvas</h1>
           </div>
         </div>
       </Header>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
@@ -76,7 +75,6 @@ export default function CanvasRosterToLadok() {
         />
         {rosterErr && <p className="text-sm text-red-600">{rosterErr}</p>}
       </div>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <RosterTable
           rows={rows}
@@ -85,7 +83,6 @@ export default function CanvasRosterToLadok() {
           onSetGrade={setGrade}
           onSetDate={setDate}
         />
-
         <div className="flex items-center gap-3">
           <Button
             className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-70 disabled:opacity-50"

@@ -1,6 +1,3 @@
-/**
- * Rest utility functions
- */
 export const getApiBase = () =>
   (process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") || "http://localhost:8080");
 
@@ -30,7 +27,7 @@ export async function jsonFetch<T>(url: string, init: RequestInit = {}): Promise
     } catch {}
     throw new Error(msg);
   }
-  // 204 No Content etc.
+
   if (res.status === 204) return undefined as unknown as T;
   return res.json() as Promise<T>;
 }
