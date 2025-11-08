@@ -32,7 +32,7 @@ export type RosterRow = {
   personnummer: string | null;
   datum: string;                 // YYYY-MM-DD
   ladokBetygPreselect: string | null;
-  selected: boolean;
+  selected: false | true;
   sent: boolean;
   ladokStatus: string | null;
   registeredAt: string | null;

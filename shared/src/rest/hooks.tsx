@@ -57,6 +57,7 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
  */
 export function useRoster(kurskod: string, modulkod: string) {
   const [rows, setRows] = useState<RosterRow[] | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,20 +70,17 @@ export function useRoster(kurskod: string, modulkod: string) {
     setError(null);
 
     try {
-      // 1) Ladok-roster med sent/ladokStatus/ev. betyg/registeredAt
       const ladokRoster = await LadokApi.getRoster(kurskod, modulkod);
-
-      // 2) Canvas roster för namn/studentId om du vill snygga till visningen
       let canvasByPnr = new Map<string, string>();
       try {
-        const canvas = await CanvasApi.listRoster(kurskod); // [{studentId, name, personnummer?}]
+        const canvas = await CanvasApi.listRoster(kurskod);
         canvasByPnr = new Map(
           canvas
             .filter((c: any) => !!c.personnummer && !!c.name)
             .map((c: any) => [c.personnummer as string, c.name as string])
         );
       } catch {
-        // frivilligt – om Canvas inte finns, skippa
+        // ignore canvas errors
       }
 
       const today = new Date().toISOString().slice(0, 10);
@@ -105,7 +103,7 @@ export function useRoster(kurskod: string, modulkod: string) {
           personnummer: dto.personnummer ?? null,
           datum: dto.registeredAt ? dto.registeredAt.slice(0, 10) : today,
           ladokBetygPreselect: dto.ladokBetyg ?? null,
-          selected: !!dto.personnummer && !sent, // välj bara icke-skickade per default
+          selected: false, 
           sent,
           ladokStatus: dto.ladokStatus ?? null,
           registeredAt: dto.registeredAt ?? null,
@@ -124,7 +122,6 @@ export function useRoster(kurskod: string, modulkod: string) {
     reload();
   }, [reload]);
 
-  // local row mutators (stable fns)
   const toggleRow = useCallback(
     (studentId: string) =>
       setRows((prev) =>

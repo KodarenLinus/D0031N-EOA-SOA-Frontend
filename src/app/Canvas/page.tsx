@@ -12,16 +12,16 @@ import { Header } from "@shared/src/componets/UI/Header";
 import { Button } from "@shared/src/componets/UI/Button";
 
 export default function CanvasRosterToLadok() {
-  const [kurskod, setKurskod] = useState("D0031N");
+  const [kurskod, setKurskod] = useState("I0015N");
   const [modulKod, setModulKod] = useState("");
 
-  // 👇 Uppdaterat: skicka in kurskod + instans + modulkod
   const {
     rows, loading, error: rosterErr,
     reload: reloadRoster,
     toggleRow, setGrade, setDate, setRows
   } = useRoster(kurskod, modulKod);
 
+  
   const { modules: epokModules, loading: epokLoading } = useEpokModules(kurskod, true);
 
   useEffect(() => {
@@ -39,15 +39,12 @@ export default function CanvasRosterToLadok() {
     const payloads = rowsToLadokPayloads(rows, kurskod, modulKod);
     const res = await register(payloads);
 
-    // (valfritt) Optimistisk uppdatering: markera skickade direkt
     if (res.ok > 0) {
       const pnrSet = new Set(payloads.map(p => p.personnummer));
       setRows(prev => prev?.map(r =>
         pnrSet.has(r.personnummer ?? "") ? { ...r, sent: true, ladokStatus: "registrerad", selected: false } : r
       ) ?? prev);
     }
-
-    // Hämta färsk status från servern (rekommenderat)
     await reloadRoster();
   };
 

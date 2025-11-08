@@ -7,7 +7,7 @@ const Header = React.forwardRef<HTMLElement, HeaderProps>(
   ({ className, ...props }, ref) => (
     <header
       ref={ref}
-      className={cn('sticky top-0 z-10 border-b bg-cyan-100 mb-6', className)}
+      className={cn('sticky top-0 z-10 bg-cyan-100 mb-6 rounded-b-2xl', className)}
       {...props}
     />
   )
