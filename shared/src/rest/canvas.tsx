@@ -1,5 +1,5 @@
 import { jsonFetch, getApiBase } from "./fetch";
-import type { Assignment, RosterItem } from "./schema";
+import type { RosterItem } from "./schema";
 /**
  * Canvas REST-klient (matchar våra Spring controllers)
  */

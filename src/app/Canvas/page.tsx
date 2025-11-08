@@ -4,7 +4,7 @@ import {
   useRoster,
   useBulkRegister,
   rowsToLadokPayloads,
-  useEpokModules,               
+  useEpokModules,
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
@@ -13,10 +13,14 @@ import { Button } from "@shared/src/componets/UI/Button";
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("D0031N");
-  const [modulKod, setModulKod] = useState("");        
+  const [modulKod, setModulKod] = useState("");
 
-  const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } =
-    useRoster(kurskod);
+  // 👇 Uppdaterat: skicka in kurskod + instans + modulkod
+  const {
+    rows, loading, error: rosterErr,
+    reload: reloadRoster,
+    toggleRow, setGrade, setDate, setRows
+  } = useRoster(kurskod, modulKod);
 
   const { modules: epokModules, loading: epokLoading } = useEpokModules(kurskod, true);
 
@@ -31,8 +35,20 @@ export default function CanvasRosterToLadok() {
   const onRegisterSelected = async () => {
     if (!rows || !modulKod) return;
     setMessage(null);
+
     const payloads = rowsToLadokPayloads(rows, kurskod, modulKod);
-    await register(payloads);
+    const res = await register(payloads);
+
+    // (valfritt) Optimistisk uppdatering: markera skickade direkt
+    if (res.ok > 0) {
+      const pnrSet = new Set(payloads.map(p => p.personnummer));
+      setRows(prev => prev?.map(r =>
+        pnrSet.has(r.personnummer ?? "") ? { ...r, sent: true, ladokStatus: "registrerad", selected: false } : r
+      ) ?? prev);
+    }
+
+    // Hämta färsk status från servern (rekommenderat)
+    await reloadRoster();
   };
 
   return (
@@ -47,16 +63,18 @@ export default function CanvasRosterToLadok() {
           </div>
         </div>
       </Header>
+
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
-          setKurskod={setKurskod}
+          setKurskod={setKurskod}    
           modulKod={modulKod}
           setModulKod={setModulKod}
           onReload={reloadRoster}
-          epokModules={epokModules}        
-          epokLoading={epokLoading}         
+          epokModules={epokModules}
+          epokLoading={epokLoading}
         />
+        {rosterErr && <p className="text-sm text-red-600">{rosterErr}</p>}
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
