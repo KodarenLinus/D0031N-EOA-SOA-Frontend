@@ -1,4 +1,5 @@
-"use client";
+'use client';
+import * as React from "react";
 import type { RosterRow } from "@shared/src/rest/schema";
 import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
 import {
@@ -37,7 +38,6 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
           <TableRow>
             <TableHead className="px-2 py-2 text-left w-10%">Val</TableHead>
             <TableHead className="px-0 py-2 text-center w-10%">Student</TableHead>
-            <TableHead className="px-0 py-2 text-center w-10%">Personnummer</TableHead>
             <TableHead className="px-0 py-2 text-center w-10%">Ladok betyg</TableHead>
             <TableHead className="px-0 py-2 text-center w-10%">Datum</TableHead>
             <TableHead className="px-0 py-2 text-center w-10%">Status</TableHead>
@@ -73,9 +73,6 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                 <TableCell className="text-center align-middle px-0 py-2">
                   <div className="font-medium">{r.name}</div>
                   <div className="text-xs text-gray-500">{r.studentId}</div>
-                </TableCell>
-                <TableCell className="text-center align-middle px-0 py-2 font-mono">
-                  {r.personnummer ?? "—"}
                 </TableCell>
                 <TableCell className="text-center align-middle px-0 py-2">
                   <Select
