@@ -70,6 +70,12 @@ export default function CanvasRosterToLadok() {
           epokModules={epokModules}
           epokLoading={epokLoading}
         />
+        {!epokLoading && epokModules.length === 0 && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            Inga moduler hittades för kurskoden <span className="font-semibold">{kurskod}</span>.
+            Kontrollera att kursen finns i Epok.
+          </div>
+        )}
         {rosterErr && <p className="text-sm text-red-600">{rosterErr}</p>}
       </div>
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
