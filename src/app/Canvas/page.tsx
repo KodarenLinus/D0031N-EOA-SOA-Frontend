@@ -85,7 +85,6 @@ export default function CanvasRosterToLadok() {
           </div>
         </div>
       </Header>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
