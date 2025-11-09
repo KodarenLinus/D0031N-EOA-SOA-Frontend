@@ -29,5 +29,9 @@ export async function jsonFetch<T>(url: string, init: RequestInit = {}): Promise
   }
 
   if (res.status === 204) return undefined as unknown as T;
+  if (res.status === 404) {
+    console.warn("404 from:", url);
+    throw Object.assign(new Error("Not Found"), { status: 404 });
+  }
   return res.json() as Promise<T>;
 }

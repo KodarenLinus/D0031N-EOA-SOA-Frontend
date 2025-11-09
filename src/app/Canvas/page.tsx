@@ -16,16 +16,29 @@ export default function CanvasRosterToLadok() {
   const [modulKod, setModulKod] = useState("");
 
   const {
-    rows, loading, error: rosterErr,
-    reload: reloadRoster,
-    toggleRow, setGrade, setDate, setRows
+    modules: epokModules,
+    loading: epokLoading,
+    reload: reloadModules,                 
+  } = useEpokModules(kurskod, true);
+
+  const {
+    rows,
+    loading: rosterLoading,
+    reload: reloadRoster,                  
+    toggleRow,
+    setGrade,
+    setDate,
+    setRows,
   } = useRoster(kurskod, modulKod);
 
-  
-  const { modules: epokModules, loading: epokLoading } = useEpokModules(kurskod, true);
+  useEffect(() => {
+    setModulKod("");
+  }, [kurskod]);
 
   useEffect(() => {
-    if (!modulKod && epokModules.length > 0) {
+    if (epokModules.length === 0) return;
+    const exists = epokModules.some((m) => m.modulkod === modulKod);
+    if (!modulKod || !exists) {
       setModulKod(epokModules[0].modulkod);
     }
   }, [epokModules, modulKod]);
@@ -40,10 +53,20 @@ export default function CanvasRosterToLadok() {
     const res = await register(payloads);
 
     if (res.ok > 0) {
-      const pnrSet = new Set(payloads.map(p => p.personnummer));
-      setRows(prev => prev?.map(r =>
-        pnrSet.has(r.personnummer ?? "") ? { ...r, sent: true, ladokStatus: "registrerad", selected: false } : r
-      ) ?? prev);
+      const pnrSet = new Set(payloads.map((p) => p.personnummer));
+      setRows(
+        (prev) =>
+          prev?.map((r) =>
+            pnrSet.has(r.personnummer ?? "")
+              ? {
+                  ...r,
+                  sent: true,
+                  ladokStatus: "registrerad",
+                  selected: false,
+                }
+              : r
+          ) ?? prev
+      );
     }
     await reloadRoster();
   };
@@ -56,35 +79,49 @@ export default function CanvasRosterToLadok() {
             <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-cyan-100">
               CA
             </div>
-            <h1 className="text-lg font-semibold tracking-tight sm:text-xl">Canvas</h1>
+            <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
+              Canvas
+            </h1>
           </div>
         </div>
       </Header>
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
-          setKurskod={setKurskod}    
+          setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          onReload={reloadRoster}
+          onReload={() => {
+            reloadModules();
+            reloadRoster();
+          }}
           epokModules={epokModules}
           epokLoading={epokLoading}
         />
-        {rosterErr && <p className="text-sm text-red-600">{rosterErr}</p>}
+
+        {!epokLoading && epokModules.length === 0 && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            Inga moduler hittades för kurskoden{" "}
+            <span className="font-semibold">{kurskod}</span>. Kontrollera att kursen
+            finns i Epok.
+          </div>
+        )}
       </div>
+
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <RosterTable
           rows={rows}
-          loading={loading}
+          loading={rosterLoading}
           onToggle={toggleRow}
           onSetGrade={setGrade}
           onSetDate={setDate}
         />
+
         <div className="flex items-center gap-3">
           <Button
             className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-70 disabled:opacity-50"
             onClick={onRegisterSelected}
-            disabled={busy || !modulKod || !rows?.some(r => r.selected)}
+            disabled={busy || !modulKod || !rows?.some((r) => r.selected)}
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
           </Button>
