@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useRoster,
   useBulkRegister,
@@ -8,8 +8,8 @@ import {
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
-import { Header } from "@shared/src/componets/UI/Header";
-import { Button } from "@shared/src/componets/UI/Button";
+import { Header } from "@shared/src/componets/UI/Header";   // dubbelkolla 'components' vs 'componets'
+import { Button } from "@shared/src/componets/UI/Button";     // samma här
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("I0015N");
@@ -18,30 +18,41 @@ export default function CanvasRosterToLadok() {
   const {
     modules: epokModules,
     loading: epokLoading,
-    reload: reloadModules,                 
+    reload: reloadModules,
   } = useEpokModules(kurskod, true);
 
   const {
     rows,
     loading: rosterLoading,
-    reload: reloadRoster,                  
+    reload: reloadRoster,
     toggleRow,
     setGrade,
     setDate,
     setRows,
   } = useRoster(kurskod, modulKod);
 
+  // Nollställ modul vid kursbyte
   useEffect(() => {
     setModulKod("");
   }, [kurskod]);
 
+  // Auto-välj första modul
   useEffect(() => {
     if (epokModules.length === 0) return;
     const exists = epokModules.some((m) => m.modulkod === modulKod);
-    if (!modulKod || !exists) {
-      setModulKod(epokModules[0].modulkod);
-    }
+    if (!modulKod || !exists) setModulKod(epokModules[0].modulkod);
   }, [epokModules, modulKod]);
+
+  // Urval/validering
+  const selected = useMemo(() => rows?.filter((r) => r.selected) ?? [], [rows]);
+  const ready = useMemo(
+    () =>
+      selected.filter(
+        (r) => !!r.personnummer && !!r.ladokBetygPreselect && !!r.datum && !r.sent
+      ),
+    [selected]
+  );
+  const blocked = useMemo(() => selected.length - ready.length, [selected, ready]);
 
   const { register, busy, message, setMessage } = useBulkRegister();
 
@@ -49,26 +60,36 @@ export default function CanvasRosterToLadok() {
     if (!rows || !modulKod) return;
     setMessage(null);
 
-    const payloads = rowsToLadokPayloads(rows, kurskod, modulKod);
-    const res = await register(payloads);
-
-    if (res.ok > 0) {
-      const pnrSet = new Set(payloads.map((p) => p.personnummer));
-      setRows(
-        (prev) =>
-          prev?.map((r) =>
-            pnrSet.has(r.personnummer ?? "")
-              ? {
-                  ...r,
-                  sent: true,
-                  ladokStatus: "registrerad",
-                  selected: false,
-                }
-              : r
-          ) ?? prev
-      );
+    const validRows = rows.filter(
+      (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !!r.datum && !r.sent
+    );
+    if (validRows.length === 0) {
+      setMessage("Inget att registrera – kontrollera betyg/datum/personnummer.");
+      return;
     }
-    await reloadRoster();
+
+    try {
+      const payloads = rowsToLadokPayloads(validRows, kurskod, modulKod);
+      const res = await register(payloads);
+
+      // Markera lokalt först efter lyckat svar
+      if (res.ok > 0) {
+        const idSet = new Set(validRows.map((r) => r.studentId));
+        setRows(
+          (prev) =>
+            prev?.map((r) =>
+              idSet.has(r.studentId)
+                ? { ...r, sent: true, ladokStatus: "registrerad", selected: false }
+                : r
+            ) ?? prev
+        );
+      }
+
+      // Hämta färskt från källor om backend sätter mer exakt info
+      await reloadRoster();
+    } catch (e: any) {
+      setMessage(e?.message ?? "Något gick fel vid registrering.");
+    }
   };
 
   return (
@@ -85,15 +106,16 @@ export default function CanvasRosterToLadok() {
           </div>
         </div>
       </Header>
+
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
           setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          onReload={() => {
-            reloadModules();
-            reloadRoster();
+          onReload={async () => {
+            await reloadModules();
+            await reloadRoster();
           }}
           epokModules={epokModules}
           epokLoading={epokLoading}
@@ -102,13 +124,14 @@ export default function CanvasRosterToLadok() {
         {!epokLoading && epokModules.length === 0 && (
           <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
             Inga moduler hittades för kurskoden{" "}
-            <span className="font-semibold">{kurskod}</span>. Kontrollera att kursen
-            finns i Epok.
+            <span className="font-semibold">{kurskod}</span>. Kontrollera att kursen finns i Epok.
           </div>
         )}
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
+        {rosterLoading && <div className="text-sm text-gray-500">Laddar roster…</div>}
+
         <RosterTable
           rows={rows}
           loading={rosterLoading}
@@ -121,10 +144,17 @@ export default function CanvasRosterToLadok() {
           <Button
             className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-70 disabled:opacity-50"
             onClick={onRegisterSelected}
-            disabled={busy || !modulKod || !rows?.some((r) => r.selected)}
+            disabled={busy || !modulKod || ready.length === 0}
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
           </Button>
+
+          <div className="text-sm text-gray-600">
+            {selected.length > 0
+              ? `${ready.length} redo · ${blocked} saknar info`
+              : "Inga valda rader"}
+          </div>
+
           {message && <span className="text-sm text-green-700">{message}</span>}
         </div>
       </div>

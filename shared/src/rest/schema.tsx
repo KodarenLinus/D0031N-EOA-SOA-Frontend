@@ -46,31 +46,26 @@ export type RosterTableData = RosterRow[];
  */
 // --- Ladok grades response
 export type LadokRosterItemDto = {
-  kurstillfalleId: number;
   kurskod: string;
-  instanskod: string;
   personnummer: string;
-  fornamn: string;
-  efternamn: string;
   registreringsStatus?: string;
   sent?: boolean;
   ladokStatus?: string;
   ladokBetyg?: string;
-  registeredAt?: string; // ISO
 };
 
 export type LadokResultRequestDto = {
   personnummer: string;
   kurskod: string;
   modulkod: string;
-  datum: string; // YYYY-MM-DD
+  datum: string;
   betyg: string;
 };
 
 export type LadokResultResponseDto = {
   id: number | null;
-  status: string;  // "registrerad" | "hinder" | ...
-  message: string; // "OK" | ...
+  status: string;  
+  message: string; 
 };
 /**
  * Epok Schema types

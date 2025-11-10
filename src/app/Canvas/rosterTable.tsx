@@ -22,12 +22,9 @@ type Props = {
   onSetDate: (studentId: string, date: string) => void;
 };
 
+// ✅ Endast r.sent === true räknas som klarmarkerad
 function isSent(r: RosterRow): boolean {
-  return (
-    (r as any).sent === true ||
-    (r as any).status === "REGISTERED" ||
-    (r as any).ladokStatus?.toLowerCase?.() === "registrerad"
-  );
+  return r.sent === true;
 }
 
 export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: Props) {
@@ -37,12 +34,13 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
         <TableHeader className="bg-cyan-100">
           <TableRow>
             <TableHead className="px-2 py-2 text-left w-10%">Val</TableHead>
-            <TableHead className="px-0 py-2 text-center w-10%">Student</TableHead>
-            <TableHead className="px-0 py-2 text-center w-10%">Ladok betyg</TableHead>
-            <TableHead className="px-0 py-2 text-center w-10%">Datum</TableHead>
-            <TableHead className="px-0 py-2 text-center w-10%">Status</TableHead>
+            <TableHead className="px-0 py-2 text-center w-30%">Student</TableHead>
+            <TableHead className="px-0 py-2 text-center w-20%">Ladok betyg</TableHead>
+            <TableHead className="px-0 py-2 text-center w-20%">Datum</TableHead>
+            <TableHead className="px-0 py-2 text-center w-20%">Status</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {(!rows || rows.length === 0) && (
             <TableRow>
@@ -51,6 +49,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
               </TableCell>
             </TableRow>
           )}
+
           {rows?.map((r) => {
             const sent = isSent(r);
             const disabled = sent || !r.personnummer;
@@ -58,9 +57,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
             return (
               <TableRow
                 key={r.studentId}
-                className={`align-top transition ${
-                  sent ? "bg-gray-50 opacity-70" : ""
-                }`}
+                className={`align-top transition ${sent ? "bg-gray-50 opacity-70" : ""}`}
               >
                 <TableCell className="px-2 py-2">
                   <input
@@ -70,10 +67,12 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                     disabled={disabled}
                   />
                 </TableCell>
+
                 <TableCell className="text-center align-middle px-0 py-2">
                   <div className="font-medium">{r.name}</div>
                   <div className="text-xs text-gray-500">{r.studentId}</div>
                 </TableCell>
+
                 <TableCell className="text-center align-middle px-0 py-2">
                   <Select
                     className="border rounded-xl px-2 py-1"
@@ -89,17 +88,17 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                     ))}
                   </Select>
                 </TableCell>
+
                 <TableCell className="text-center align-left px-0 py-2">
-                  <div className="flex justify-center items-center">
-                    <Input
-                      date
-                      className="h-8 w-35 rounded-xl border px-2 text-sm" 
-                      value={r.datum}
-                      onChangeDate={(date) => onSetDate(r.studentId, date)}
-                    />
-                  </div>
-                 
+                  <Input
+                    date
+                    className="h-8 w-35 rounded-xl border px-2 text-sm"
+                    value={r.datum}
+                    onChangeDate={(date) => onSetDate(r.studentId, date)}
+                    disabled={disabled}
+                  />
                 </TableCell>
+
                 <TableCell className="text-center align-middle px-0 py-2">
                   {sent ? (
                     <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 border border-green-300">

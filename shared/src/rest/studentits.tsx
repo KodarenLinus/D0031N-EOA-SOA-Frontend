@@ -1,5 +1,4 @@
 import { jsonFetch, getApiBase } from "./fetch";
-import type { Assignment, RosterItem } from "./schema";
 /**
  * StudentITS REST-klient
  */
