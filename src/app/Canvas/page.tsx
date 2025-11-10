@@ -1,11 +1,10 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
-import { getApiBase } from "@shared/src/rest/fetch";
-import { 
-  useAssignments, 
-  useRoster, 
-  useBulkRegister, 
-  rowsToLadokPayloads 
+import { useState, useEffect } from "react";
+import {
+  useRoster,
+  useBulkRegister,
+  rowsToLadokPayloads,
+  useEpokModules,
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
@@ -13,43 +12,71 @@ import { Header } from "@shared/src/componets/UI/Header";
 import { Button } from "@shared/src/componets/UI/Button";
 
 export default function CanvasRosterToLadok() {
-  const API = useMemo(() => getApiBase(), []);
-  const [kurskod, setKurskod] = useState("D0031N");
-  const [modulKod, setModulKod] = useState("0005");
-  const [assignmentId, setAssignmentId] = useState<number | null>(null);
+  const [kurskod, setKurskod] = useState("I0015N");
+  const [modulKod, setModulKod] = useState("");
 
-  // data hooks
-  const { assignments, error: assignErr, reload: reloadAssignments } = useAssignments(kurskod);
-  const { rows, loading, error: rosterErr, reload: reloadRoster, toggleRow, setGrade, setDate } = useRoster(kurskod, assignmentId);
+  const {
+    modules: epokModules,
+    loading: epokLoading,
+    reload: reloadModules,                 
+  } = useEpokModules(kurskod, true);
 
-  // set default assignment when list loads
+  const {
+    rows,
+    loading: rosterLoading,
+    reload: reloadRoster,                  
+    toggleRow,
+    setGrade,
+    setDate,
+    setRows,
+  } = useRoster(kurskod, modulKod);
+
   useEffect(() => {
-    if (!assignmentId && assignments.length > 0) {
-      setAssignmentId(assignments[0].id);
+    setModulKod("");
+  }, [kurskod]);
+
+  useEffect(() => {
+    if (epokModules.length === 0) return;
+    const exists = epokModules.some((m) => m.modulkod === modulKod);
+    if (!modulKod || !exists) {
+      setModulKod(epokModules[0].modulkod);
     }
-  }, [assignments, assignmentId]);
+  }, [epokModules, modulKod]);
 
   const { register, busy, message, setMessage } = useBulkRegister();
 
-  const onReloadAll = () => {
-    reloadAssignments();
-    if (assignmentId) reloadRoster();
-  };
-
   const onRegisterSelected = async () => {
-    if (!rows) return;
+    if (!rows || !modulKod) return;
     setMessage(null);
+
     const payloads = rowsToLadokPayloads(rows, kurskod, modulKod);
-    await register(payloads);
+    const res = await register(payloads);
+
+    if (res.ok > 0) {
+      const pnrSet = new Set(payloads.map((p) => p.personnummer));
+      setRows(
+        (prev) =>
+          prev?.map((r) =>
+            pnrSet.has(r.personnummer ?? "")
+              ? {
+                  ...r,
+                  sent: true,
+                  ladokStatus: "registrerad",
+                  selected: false,
+                }
+              : r
+          ) ?? prev
+      );
+    }
+    await reloadRoster();
   };
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <Header>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-blue-400">
+            <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black text-sm font-semibold text-cyan-100">
               CA
             </div>
             <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
@@ -58,26 +85,33 @@ export default function CanvasRosterToLadok() {
           </div>
         </div>
       </Header>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
-         <Filters
-          apiLabel={API}
+        <Filters
           kurskod={kurskod}
           setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          assignments={assignments}
-          assignmentId={assignmentId}
-          setAssignmentId={setAssignmentId}
-          onReload={onReloadAll}
-          error={assignErr || rosterErr}
+          onReload={() => {
+            reloadModules();
+            reloadRoster();
+          }}
+          epokModules={epokModules}
+          epokLoading={epokLoading}
         />
+
+        {!epokLoading && epokModules.length === 0 && (
+          <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+            Inga moduler hittades för kurskoden{" "}
+            <span className="font-semibold">{kurskod}</span>. Kontrollera att kursen
+            finns i Epok.
+          </div>
+        )}
       </div>
-     
+
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <RosterTable
           rows={rows}
-          loading={loading}
+          loading={rosterLoading}
           onToggle={toggleRow}
           onSetGrade={setGrade}
           onSetDate={setDate}
@@ -85,9 +119,9 @@ export default function CanvasRosterToLadok() {
 
         <div className="flex items-center gap-3">
           <Button
-            className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-90 disabled:opacity-50"
+            className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-70 disabled:opacity-50"
             onClick={onRegisterSelected}
-            disabled={busy || !rows?.some(r => r.selected)}
+            disabled={busy || !modulKod || !rows?.some((r) => r.selected)}
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
           </Button>

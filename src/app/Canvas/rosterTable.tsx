@@ -1,16 +1,14 @@
-"use client";
-import React from "react";
+'use client';
+import * as React from "react";
 import type { RosterRow } from "@shared/src/rest/schema";
 import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
-import { 
-    Table,
-    TableHeader,
-    TableBody,
-    TableFooter,
-    TableRow,
-    TableHead,
-    TableCell,
-    TableCaption,
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
 } from "@shared/src/componets/UI/Table";
 import { Input } from "@shared/src/componets/UI/Input";
 import { Select } from "@shared/src/componets/UI/Select";
@@ -24,18 +22,25 @@ type Props = {
   onSetDate: (studentId: string, date: string) => void;
 };
 
+function isSent(r: RosterRow): boolean {
+  return (
+    (r as any).sent === true ||
+    (r as any).status === "REGISTERED" ||
+    (r as any).ladokStatus?.toLowerCase?.() === "registrerad"
+  );
+}
+
 export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: Props) {
   return (
     <div className="rounded-2xl shadow overflow-auto">
       <Table className="min-w-full text-sm">
         <TableHeader className="bg-cyan-100">
           <TableRow>
-            <TableHead className="px-3 py-2 text-left">Val</TableHead>
-            <TableHead className="px-3 py-2 text-left">Student</TableHead>
-            <TableHead className="px-3 py-2 text-left">Personnummer</TableHead>
-            <TableHead className="px-3 py-2 text-left">Canvas</TableHead>
-            <TableHead className="px-3 py-2 text-left">Ladok betyg</TableHead>
-            <TableHead className="px-3 py-2 text-left">Datum</TableHead>
+            <TableHead className="px-2 py-2 text-left w-10%">Val</TableHead>
+            <TableHead className="px-0 py-2 text-center w-10%">Student</TableHead>
+            <TableHead className="px-0 py-2 text-center w-10%">Ladok betyg</TableHead>
+            <TableHead className="px-0 py-2 text-center w-10%">Datum</TableHead>
+            <TableHead className="px-0 py-2 text-center w-10%">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -46,32 +51,69 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
               </TableCell>
             </TableRow>
           )}
-          {rows?.map(r => (
-            <TableRow key={r.studentId} className="align-top">
-              <TableCell className="px-3 py-2">
-                <input type="checkbox" checked={r.selected} onChange={()=>onToggle(r.studentId)} disabled={!r.personnummer}/>
-              </TableCell>
-              <TableCell className="px-3 py-2">
-                <div className="font-medium">{r.name}</div>
-                <div className="text-xs text-gray-500">{r.studentId}</div>
-              </TableCell>
-              <TableCell className="px-3 py-2 font-mono">{r.personnummer ?? "—"}</TableCell>
-              <TableCell className="px-3 py-2">{r.canvasOmdome ?? "-"}</TableCell>
-              <TableCell className="px-3 py-2">
-                <Select className="border rounded-xl px-2 py-1"
-                        value={r.ladokBetygPreselect ?? ""}
-                        onChange={e=>onSetGrade(r.studentId, e.target.value)}>
-                  <Option value="">(välj)</Option>
-                  {GRADE_OPTIONS.map(g => <Option key={g} value={g}>{g}</Option>)}
-                </Select>
-              </TableCell>
-              <TableCell className="px-3 py-2">
-                <Input type="date" className="border rounded-xl px-2 py-1"
-                       value={r.datum}
-                       onChange={e=>onSetDate(r.studentId, e.target.value)} />
-              </TableCell>
-            </TableRow>
-          ))}
+          {rows?.map((r) => {
+            const sent = isSent(r);
+            const disabled = sent || !r.personnummer;
+
+            return (
+              <TableRow
+                key={r.studentId}
+                className={`align-top transition ${
+                  sent ? "bg-gray-50 opacity-70" : ""
+                }`}
+              >
+                <TableCell className="px-2 py-2">
+                  <input
+                    type="checkbox"
+                    checked={!!r.selected}
+                    onChange={() => onToggle(r.studentId)}
+                    disabled={disabled}
+                  />
+                </TableCell>
+                <TableCell className="text-center align-middle px-0 py-2">
+                  <div className="font-medium">{r.name}</div>
+                  <div className="text-xs text-gray-500">{r.studentId}</div>
+                </TableCell>
+                <TableCell className="text-center align-middle px-0 py-2">
+                  <Select
+                    className="border rounded-xl px-2 py-1"
+                    value={r.ladokBetygPreselect ?? ""}
+                    onChange={(e) => onSetGrade(r.studentId, e.target.value)}
+                    disabled={disabled}
+                  >
+                    <Option value="">(välj)</Option>
+                    {GRADE_OPTIONS.map((g) => (
+                      <Option key={g} value={g}>
+                        {g}
+                      </Option>
+                    ))}
+                  </Select>
+                </TableCell>
+                <TableCell className="text-center align-left px-0 py-2">
+                  <div className="flex justify-center items-center">
+                    <Input
+                      date
+                      className="h-8 w-35 rounded-xl border px-2 text-sm" 
+                      value={r.datum}
+                      onChangeDate={(date) => onSetDate(r.studentId, date)}
+                    />
+                  </div>
+                 
+                </TableCell>
+                <TableCell className="text-center align-middle px-0 py-2">
+                  {sent ? (
+                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 border border-green-300">
+                      Klarmarkerad
+                    </span>
+                  ) : (
+                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-red-50 text-red-700 border border-red-300">
+                      Ej klarmarkerad
+                    </span>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
