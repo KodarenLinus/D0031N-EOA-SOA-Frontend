@@ -3,13 +3,13 @@ import { useState, useEffect, useMemo } from "react";
 import {
   useRoster,
   useBulkRegister,
-  rowsToLadokPayloads,
+  useRowsToLadokPayloads,
   useEpokModules,
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
-import { Header } from "@shared/src/componets/UI/Header";   // dubbelkolla 'components' vs 'componets'
-import { Button } from "@shared/src/componets/UI/Button";     // samma här
+import { Header } from "@shared/src/componets/UI/Header";   
+import { Button } from "@shared/src/componets/UI/Button";     
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("I0015N");
@@ -31,7 +31,7 @@ export default function CanvasRosterToLadok() {
     setRows,
   } = useRoster(kurskod, modulKod);
 
-  // Nollställ modul vid kursbyte
+  // Reset modulKod when kurskod changes
   useEffect(() => {
     setModulKod("");
   }, [kurskod]);
@@ -69,7 +69,7 @@ export default function CanvasRosterToLadok() {
     }
 
     try {
-      const payloads = rowsToLadokPayloads(validRows, kurskod, modulKod);
+      const payloads = useRowsToLadokPayloads(validRows, kurskod, modulKod);
       const res = await register(payloads);
 
       // Markera lokalt först efter lyckat svar
