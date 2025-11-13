@@ -68,16 +68,14 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
 
 /**
  * Roster (Canvas -> StudentITS -> Ladok)
- * - name, studentId: Canvas
- * - personnummer: StudentITS (via studentId)
- * - betyg/status/sent: Ladok (match via personnummer)
- * - sent = true endast om Ladok skickar true
+ * @return rows, loading, error, reload, toggleRow, setGrade, setDate, setRows
  */
 export function useRoster(kurskod: string, modulkod: string) {
   const [rows, setRows] = useState<RosterRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reload function to fetch and build roster  
   const reload = useCallback(async () => {
     if (!kurskod || !modulkod) {
       setRows(null);
@@ -88,15 +86,17 @@ export function useRoster(kurskod: string, modulkod: string) {
     setError(null);
 
     try {
-      // 1️⃣ Canvas roster
+      // Canvas roster
       const canvasResp = (await CanvasApi.listRoster(kurskod)) as
         | CanvasRosterResponse
         | RosterItem[];
 
+      // Normalize response
       const canvasRoster: RosterItem[] = Array.isArray(canvasResp)
         ? canvasResp
         : (canvasResp?.roster ?? []);
 
+      // Clean Canvas data
       const cleanCanvas = canvasRoster
         .map((c) => ({
           studentId: String(c.studentId),
@@ -106,7 +106,7 @@ export function useRoster(kurskod: string, modulkod: string) {
 
       const studentIds = cleanCanvas.map((c) => c.studentId);
 
-      // 2️⃣ StudentITS – hämta personnummer
+      // StudentITS – get personnummer
       let pnrByStudentId = new Map<string, string>();
       try {
         if (typeof (StudentITSApi as any).getPersonnummerBatch === "function") {
@@ -137,54 +137,51 @@ export function useRoster(kurskod: string, modulkod: string) {
         console.warn("StudentITS lookup failed", e);
       }
 
-      // 3️⃣ Ladok roster
+      // Ladok roster
       const ladokRoster = (await LadokApi.getRoster(
         kurskod,
         modulkod
       )) as LadokRosterItemDto[];
 
+      // Map Ladok by personnummer
       const ladokByPnr = new Map<string, LadokRosterItemDto>();
       for (const dto of ladokRoster) {
         if (dto.personnummer) ladokByPnr.set(String(dto.personnummer), dto);
       }
 
-      // 4️⃣ Bygg UI-rader
-      const today = todayISO();
+      // Build table rows
+
       const table: RosterRow[] = cleanCanvas.map(({ studentId, name }) => {
         const personnummer = pnrByStudentId.get(studentId) ?? null;
         const ladok = personnummer ? ladokByPnr.get(personnummer) : undefined;
-
-        const ladokStatus =
-          ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null;
-
-        // ✅ sent endast true om Ladok skickar exakt true
-        const sent = ladok?.sent === true;
 
         return {
           studentId,
           name,
           personnummer,
-          datum: today,
           ladokBetygPreselect: ladok?.ladokBetyg ?? null,
+          datum: ladok?.datum ?? todayISO(),
           selected: false,
-          sent,
-          ladokStatus,
+          sent: ladok?.sent === true, // only true counts as sent
+          ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null, // get latest status
           registeredAt: null,
         };
       });
 
       setRows(table);
-    } catch (e: any) {
+    } catch (e: Error | any) {
       setError(e?.message || "Kunde inte hämta roster");
     } finally {
       setLoading(false);
     }
   }, [kurskod, modulkod]);
 
+  // Effect to load on kurskod change
   useEffect(() => {
     reload();
   }, [reload]);
 
+  // Helper to toggle row selection
   const toggleRow = useCallback(
     (studentId: string) =>
       setRows((prev) =>
@@ -195,6 +192,7 @@ export function useRoster(kurskod: string, modulkod: string) {
     []
   );
 
+  // Helper show grade in ladok if already sent
   const setGrade = useCallback(
     (studentId: string, grade: string) =>
       setRows((prev) =>
@@ -207,6 +205,7 @@ export function useRoster(kurskod: string, modulkod: string) {
     []
   );
 
+  // Helper show date in ladok if already sent
   const setDate = useCallback(
     (studentId: string, date: string) =>
       setRows((prev) =>
@@ -217,12 +216,21 @@ export function useRoster(kurskod: string, modulkod: string) {
     []
   );
 
-  return { rows, loading, error, reload, toggleRow, setGrade, setDate, setRows };
+  return { 
+    rows, 
+    loading, 
+    error, 
+    reload, 
+    toggleRow, 
+    setGrade, 
+    setDate, 
+    setRows 
+  };
 }
 
 /**
- * Bulk register – anropar LadokApi.postResult för varje payload.
- * Returnerar summering (ok/fail) och meddelande.
+ * Bulk register – calls LadokApi.postResult for every payload.
+ * Returns summary (ok/fail) and message.
  * @returns register, busy, message, setMessage
  */
 export function useBulkRegister() {
@@ -273,10 +281,10 @@ export function useBulkRegister() {
 }
 
 /**
- * Konverterar UI-rader till Ladok-payloads (skickar inte redan skickade).
+ * Converts UI-rows to Ladok-payloads (does not send already sent).
  * @return LadokResultRequestDto[]
  */
-export function rowsToLadokPayloads(
+export function useRowsToLadokPayloads(
   rows: RosterRow[],
   kurskod: string,
   modulkod: string

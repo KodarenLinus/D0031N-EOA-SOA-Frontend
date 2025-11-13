@@ -3,13 +3,13 @@ import { useState, useEffect, useMemo } from "react";
 import {
   useRoster,
   useBulkRegister,
-  rowsToLadokPayloads,
+  useRowsToLadokPayloads,
   useEpokModules,
 } from "@shared/src/rest/hooks";
 import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
-import { Header } from "@shared/src/componets/UI/Header";   // dubbelkolla 'components' vs 'componets'
-import { Button } from "@shared/src/componets/UI/Button";     // samma här
+import { Header } from "@shared/src/componets/UI/Header";   
+import { Button } from "@shared/src/componets/UI/Button";     
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("I0015N");
@@ -31,19 +31,19 @@ export default function CanvasRosterToLadok() {
     setRows,
   } = useRoster(kurskod, modulKod);
 
-  // Nollställ modul vid kursbyte
+  // Reset modulKod when kurskod changes
   useEffect(() => {
     setModulKod("");
   }, [kurskod]);
 
-  // Auto-välj första modul
+  // Auto select first module
   useEffect(() => {
     if (epokModules.length === 0) return;
     const exists = epokModules.some((m) => m.modulkod === modulKod);
     if (!modulKod || !exists) setModulKod(epokModules[0].modulkod);
   }, [epokModules, modulKod]);
 
-  // Urval/validering
+  // Selection/validation
   const selected = useMemo(() => rows?.filter((r) => r.selected) ?? [], [rows]);
   const ready = useMemo(
     () =>
@@ -52,10 +52,18 @@ export default function CanvasRosterToLadok() {
       ),
     [selected]
   );
+  // Blocked rows (Rows that are not allowed to be registered)
   const blocked = useMemo(() => selected.length - ready.length, [selected, ready]);
 
-  const { register, busy, message, setMessage } = useBulkRegister();
+  // Bulk register
+  const { 
+    register, 
+    busy, 
+    message, 
+    setMessage 
+  } = useBulkRegister();
 
+  // Renderer for register button
   const onRegisterSelected = async () => {
     if (!rows || !modulKod) return;
     setMessage(null);
@@ -69,7 +77,7 @@ export default function CanvasRosterToLadok() {
     }
 
     try {
-      const payloads = rowsToLadokPayloads(validRows, kurskod, modulKod);
+      const payloads = useRowsToLadokPayloads(validRows, kurskod, modulKod);
       const res = await register(payloads);
 
       // Markera lokalt först efter lyckat svar
@@ -85,7 +93,7 @@ export default function CanvasRosterToLadok() {
         );
       }
 
-      // Hämta färskt från källor om backend sätter mer exakt info
+      // Fetch latest roster 
       await reloadRoster();
     } catch (e: any) {
       setMessage(e?.message ?? "Något gick fel vid registrering.");

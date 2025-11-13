@@ -52,6 +52,7 @@ export type LadokRosterItemDto = {
   sent?: boolean;
   ladokStatus?: string;
   ladokBetyg?: string;
+  datum?: string;
 };
 
 export type LadokResultRequestDto = {
