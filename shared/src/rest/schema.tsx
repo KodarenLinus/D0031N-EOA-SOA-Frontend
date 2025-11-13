@@ -30,13 +30,14 @@ export type RosterRow = {
   studentId: string;
   name: string;
   personnummer: string | null;
-  datum: string;                 // YYYY-MM-DD
+  datum: string;                 
   ladokBetygPreselect: string | null;
   selected: false | true;
   sent: boolean;
   ladokStatus: string | null;
   registeredAt: string | null;
 };
+
 // --- Roster table data ---
 export type RosterTableData = RosterRow[];
 

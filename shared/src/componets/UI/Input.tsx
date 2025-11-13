@@ -1,4 +1,3 @@
-'use client'
 import * as React from 'react'
 import { cn } from '@shared/utils'
 
@@ -26,8 +25,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className
           )}
           onChange={(e) => {
-            onChangeDate?.(e.target.value)   // ger 'YYYY-MM-DD'
-            onChange?.(e)                    // bevara ev. extern onChange
+            onChangeDate?.(e.target.value)   
+            onChange?.(e)                    
           }}
           {...rest}
         />

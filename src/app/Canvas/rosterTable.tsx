@@ -1,5 +1,4 @@
 'use client';
-import * as React from "react";
 import type { RosterRow } from "@shared/src/rest/schema";
 import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
 import {
@@ -22,7 +21,6 @@ type Props = {
   onSetDate: (studentId: string, date: string) => void;
 };
 
-// ✅ Endast r.sent === true räknas som klarmarkerad
 function isSent(r: RosterRow): boolean {
   return r.sent === true;
 }
@@ -40,7 +38,6 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
             <TableHead className="px-0 py-2 text-center w-20%">Status</TableHead>
           </TableRow>
         </TableHeader>
-
         <TableBody>
           {(!rows || rows.length === 0) && (
             <TableRow>
@@ -67,12 +64,10 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                     disabled={disabled}
                   />
                 </TableCell>
-
                 <TableCell className="text-center align-middle px-0 py-2">
                   <div className="font-medium">{r.name}</div>
                   <div className="text-xs text-gray-500">{r.studentId}</div>
                 </TableCell>
-
                 <TableCell className="text-center align-middle px-0 py-2">
                   <Select
                     className="border rounded-xl px-2 py-1"
@@ -88,18 +83,18 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                     ))}
                   </Select>
                 </TableCell>
-
-                <TableCell className="text-center align-left px-0 py-2">
-                  <Input
-                    date
-                    className="h-8 w-35 rounded-xl border px-2 text-sm"
-                    value={r.datum}
-                    onChangeDate={(date) => onSetDate(r.studentId, date)}
-                    disabled={disabled}
-                  />
+                <TableCell className="px-0 py-2">
+                  <div className="flex items-center justify-center">
+                    <Input
+                      date
+                      className="h-8 w-35 rounded-xl border px-2 text-sm"
+                      value={r.datum}
+                      onChangeDate={(date) => onSetDate(r.studentId, date)}
+                      disabled={disabled}
+                    />
+                  </div>
                 </TableCell>
-
-                <TableCell className="text-center align-middle px-0 py-2">
+                <TableCell className="align-middle text-center px-0 py-2">
                   {sent ? (
                     <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 border border-green-300">
                       Klarmarkerad

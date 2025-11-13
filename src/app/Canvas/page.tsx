@@ -10,6 +10,7 @@ import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
 import { Header } from "@shared/src/componets/UI/Header";   
 import { Button } from "@shared/src/componets/UI/Button";     
+import { Toast } from "@shared/src/componets/UI/Toast";
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("I0015N");
@@ -52,9 +53,7 @@ export default function CanvasRosterToLadok() {
       ),
     [selected]
   );
-  // Blocked rows (Rows that are not allowed to be registered)
-  const blocked = useMemo(() => selected.length - ready.length, [selected, ready]);
-
+  
   // Bulk register
   const { 
     register, 
@@ -71,16 +70,10 @@ export default function CanvasRosterToLadok() {
     const validRows = rows.filter(
       (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !!r.datum && !r.sent
     );
-    if (validRows.length === 0) {
-      setMessage("Inget att registrera – kontrollera betyg/datum/personnummer.");
-      return;
-    }
-
     try {
       const payloads = useRowsToLadokPayloads(validRows, kurskod, modulKod);
       const res = await register(payloads);
 
-      // Markera lokalt först efter lyckat svar
       if (res.ok > 0) {
         const idSet = new Set(validRows.map((r) => r.studentId));
         setRows(
@@ -156,14 +149,15 @@ export default function CanvasRosterToLadok() {
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
           </Button>
-
-          <div className="text-sm text-gray-600">
-            {selected.length > 0
-              ? `${ready.length} redo · ${blocked} saknar info`
-              : "Inga valda rader"}
-          </div>
-
-          {message && <span className="text-sm text-green-700">{message}</span>}
+          {message && (
+            <Toast
+              open={!!message}
+              title={`Betyg underlag skickat för modul ${modulKod}`}
+              description={message}
+              type="success"
+              onOpenChange={() => setMessage(null)}
+            />
+          )}
         </div>
       </div>
     </div>
