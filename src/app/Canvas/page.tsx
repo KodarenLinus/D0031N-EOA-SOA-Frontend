@@ -143,7 +143,7 @@ export default function CanvasRosterToLadok() {
 
         <div className="flex items-center gap-3">
           <Button
-            className="rounded-2xl px-4 py-2 shadow-sm border hover:opacity-70 disabled:opacity-50"
+            className="bg-cyan-400 text-white rounded-2xl border-cyan-500 shadow-sm hover:opacity-70 disabled:opacity-50"
             onClick={onRegisterSelected}
             disabled={busy || !modulKod || ready.length === 0}
           >
