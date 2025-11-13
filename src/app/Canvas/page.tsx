@@ -36,14 +36,14 @@ export default function CanvasRosterToLadok() {
     setModulKod("");
   }, [kurskod]);
 
-  // Auto-välj första modul
+  // Auto select first module
   useEffect(() => {
     if (epokModules.length === 0) return;
     const exists = epokModules.some((m) => m.modulkod === modulKod);
     if (!modulKod || !exists) setModulKod(epokModules[0].modulkod);
   }, [epokModules, modulKod]);
 
-  // Urval/validering
+  // Selection/validation
   const selected = useMemo(() => rows?.filter((r) => r.selected) ?? [], [rows]);
   const ready = useMemo(
     () =>
@@ -52,10 +52,18 @@ export default function CanvasRosterToLadok() {
       ),
     [selected]
   );
+  // Blocked rows (Rows that are not allowed to be registered)
   const blocked = useMemo(() => selected.length - ready.length, [selected, ready]);
 
-  const { register, busy, message, setMessage } = useBulkRegister();
+  // Bulk register
+  const { 
+    register, 
+    busy, 
+    message, 
+    setMessage 
+  } = useBulkRegister();
 
+  // Renderer for register button
   const onRegisterSelected = async () => {
     if (!rows || !modulKod) return;
     setMessage(null);
@@ -85,7 +93,7 @@ export default function CanvasRosterToLadok() {
         );
       }
 
-      // Hämta färskt från källor om backend sätter mer exakt info
+      // Fetch latest roster 
       await reloadRoster();
     } catch (e: any) {
       setMessage(e?.message ?? "Något gick fel vid registrering.");

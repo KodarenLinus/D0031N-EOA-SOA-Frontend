@@ -155,13 +155,6 @@ export function useRoster(kurskod: string, modulkod: string) {
         const personnummer = pnrByStudentId.get(studentId) ?? null;
         const ladok = personnummer ? ladokByPnr.get(personnummer) : undefined;
 
-        // Ladok status
-        const ladokStatus =
-          ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null;
-
-        // sent is only true if Ladok explicitly says so
-        const sent = ladok?.sent === true;      
-
         return {
           studentId,
           name,
@@ -169,14 +162,14 @@ export function useRoster(kurskod: string, modulkod: string) {
           ladokBetygPreselect: ladok?.ladokBetyg ?? null,
           datum: ladok?.datum ?? todayISO(),
           selected: false,
-          sent,
-          ladokStatus,
+          sent: ladok?.sent === true, // only true counts as sent
+          ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null, // get latest status
           registeredAt: null,
         };
       });
 
       setRows(table);
-    } catch (e: any) {
+    } catch (e: Error | any) {
       setError(e?.message || "Kunde inte hämta roster");
     } finally {
       setLoading(false);
