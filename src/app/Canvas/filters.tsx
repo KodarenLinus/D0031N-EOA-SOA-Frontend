@@ -90,7 +90,7 @@ export function Filters({
               type="button"
               onClick={onReload}
               disabled={epokLoading}
-              className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 active:opacity-80 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 border-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 active:opacity-80 disabled:opacity-60"
             >
               {epokLoading ? "Hämtar…" : "Ladda studenter"}
             </Button>

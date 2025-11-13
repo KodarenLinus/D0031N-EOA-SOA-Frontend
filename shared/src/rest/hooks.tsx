@@ -86,7 +86,6 @@ export function useRoster(kurskod: string, modulkod: string) {
     setError(null);
 
     try {
-      // Canvas roster
       const canvasResp = (await CanvasApi.listRoster(kurskod)) as
         | CanvasRosterResponse
         | RosterItem[];
@@ -150,7 +149,6 @@ export function useRoster(kurskod: string, modulkod: string) {
       }
 
       // Build table rows
-
       const table: RosterRow[] = cleanCanvas.map(({ studentId, name }) => {
         const personnummer = pnrByStudentId.get(studentId) ?? null;
         const ladok = personnummer ? ladokByPnr.get(personnummer) : undefined;
@@ -234,7 +232,6 @@ export function useRoster(kurskod: string, modulkod: string) {
  * @returns register, busy, message, setMessage
  */
 export function useBulkRegister() {
-  // State
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
