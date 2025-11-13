@@ -248,32 +248,25 @@ export function useBulkRegister() {
     // Loop payloads and call LadokApi.postResult
     for (const body of payloads) {
       try {
-        // Call LadokApi.postResult
         const res = await LadokApi.postResult(body);
         if (
-          // Success status
           res.status.toLowerCase() === "registrerad" ||
           /redan/i.test(res.message)
         ) {
-          // Count as ok
           ok++;
         } else {
-          // Count as fail
           fail++;
         }
       } catch {
-        // Count as fail
         fail++;
       }
     }
-    // Set state 
     setBusy(false);
-    
-    // Set message
     setMessage(`Klar: ${ok} registrerade, ${fail} fel`);
-
-    // Return summary
-    return { ok, fail };
+    return { 
+      ok, 
+      fail 
+    };
   }, []);
 
   // Return state and register function
@@ -293,8 +286,7 @@ export function useRowsToLadokPayloads(
   return rows
     .filter(
       (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !r.sent
-    )
-    .map((r) => ({
+    ).map((r) => ({
       personnummer: r.personnummer!,
       kurskod,
       modulkod,

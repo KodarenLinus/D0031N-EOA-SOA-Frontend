@@ -13,7 +13,6 @@ type Props = {
   modulKod: string;
   setModulKod: (v: string) => void;
   onReload: () => void;                
-  error?: string | null;
   epokModules: EpokModule[];
   epokLoading?: boolean;
 };
@@ -24,7 +23,6 @@ export function Filters({
   modulKod,
   setModulKod,
   onReload,
-  error,
   epokModules,
   epokLoading,
 }: Props) {

@@ -53,9 +53,7 @@ export default function CanvasRosterToLadok() {
       ),
     [selected]
   );
-  // Blocked rows (Rows that are not allowed to be registered)
-  const blocked = useMemo(() => selected.length - ready.length, [selected, ready]);
-
+  
   // Bulk register
   const { 
     register, 
@@ -72,16 +70,10 @@ export default function CanvasRosterToLadok() {
     const validRows = rows.filter(
       (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !!r.datum && !r.sent
     );
-    if (validRows.length === 0) {
-      setMessage("Inget att registrera – kontrollera betyg/datum/personnummer.");
-      return;
-    }
-
     try {
       const payloads = useRowsToLadokPayloads(validRows, kurskod, modulKod);
       const res = await register(payloads);
 
-      // Markera lokalt först efter lyckat svar
       if (res.ok > 0) {
         const idSet = new Set(validRows.map((r) => r.studentId));
         setRows(
