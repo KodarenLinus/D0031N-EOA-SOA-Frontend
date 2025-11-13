@@ -10,6 +10,7 @@ import { Filters } from "@src/app/Canvas/filters";
 import { RosterTable } from "@src/app/Canvas/rosterTable";
 import { Header } from "@shared/src/componets/UI/Header";   
 import { Button } from "@shared/src/componets/UI/Button";     
+import { Toast } from "@shared/src/componets/UI/Toast";
 
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("I0015N");
@@ -156,14 +157,15 @@ export default function CanvasRosterToLadok() {
           >
             {busy ? "Registrerar…" : "Registrera valda i Ladok"}
           </Button>
-
-          <div className="text-sm text-gray-600">
-            {selected.length > 0
-              ? `${ready.length} redo · ${blocked} saknar info`
-              : "Inga valda rader"}
-          </div>
-
-          {message && <span className="text-sm text-green-700">{message}</span>}
+          {message && (
+            <Toast
+              open={!!message}
+              title={`Betyg underlag skickat för modul ${modulKod}`}
+              description={message}
+              type="success"
+              onOpenChange={() => setMessage(null)}
+            />
+          )}
         </div>
       </div>
     </div>

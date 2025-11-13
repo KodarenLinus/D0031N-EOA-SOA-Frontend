@@ -22,7 +22,6 @@ type Props = {
   onSetDate: (studentId: string, date: string) => void;
 };
 
-// ✅ Endast r.sent === true räknas som klarmarkerad
 function isSent(r: RosterRow): boolean {
   return r.sent === true;
 }
