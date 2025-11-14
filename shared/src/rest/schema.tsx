@@ -56,6 +56,7 @@ export type LadokRosterItemDto = {
   datum?: string;
 };
 
+// --- Ladok result request
 export type LadokResultRequestDto = {
   personnummer: string;
   kurskod: string;
@@ -64,15 +65,16 @@ export type LadokResultRequestDto = {
   betyg: string;
 };
 
+// --- Ladok result response
 export type LadokResultResponseDto = {
   id: number | null;
   status: string;  
   message: string; 
 };
+
 /**
  * Epok Schema types
  */
-// --- Epok domain types ---
 export type EpokModule = {
   modulkod: string;
   namn: string;
