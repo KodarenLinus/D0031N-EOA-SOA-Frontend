@@ -132,7 +132,6 @@ export default function CanvasRosterToLadok() {
 
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         {rosterLoading && <div className="text-sm text-gray-500">Laddar roster…</div>}
-
         <RosterTable
           rows={rows}
           loading={rosterLoading}
