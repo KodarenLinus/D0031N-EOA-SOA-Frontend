@@ -12,6 +12,7 @@ import {
 import { Input } from "@shared/src/componets/UI/Input";
 import { Select } from "@shared/src/componets/UI/Select";
 import { Option } from "@shared/src/componets/UI/Option";
+import { Button } from "@shared/src/componets/UI/Button";
 
 type Props = {
   rows: RosterRow[] | null;
@@ -27,89 +28,103 @@ function isSent(r: RosterRow): boolean {
 
 export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: Props) {
   return (
-    <div className="rounded-2xl shadow overflow-auto">
-      <Table className="min-w-full text-sm">
-        <TableHeader className="bg-cyan-100">
-          <TableRow>
-            <TableHead className="px-2 py-2 text-left w-10%">Val</TableHead>
-            <TableHead className="px-0 py-2 text-center w-30%">Student</TableHead>
-            <TableHead className="px-0 py-2 text-center w-20%">Ladok betyg</TableHead>
-            <TableHead className="px-0 py-2 text-center w-20%">Datum</TableHead>
-            <TableHead className="px-0 py-2 text-center w-20%">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {(!rows || rows.length === 0) && (
+    <div>
+      <Button
+        className="bg-cyan-400 border-cyan-500 shadow-sm mb-4 text-sm text-white hover:opacity-70 active:scale-95"
+        onClick={() => {
+          rows?.forEach((r) => {
+            if (!isSent(r)) {
+              onToggle(r.studentId);
+            }
+          });
+        }}
+        disabled={!rows || rows.length === 0}
+        children="Markera / avmarkera alla"
+      />
+      <div className="rounded-2xl shadow overflow-auto">
+        <Table className="min-w-full text-sm">
+          <TableHeader className="bg-cyan-100">
             <TableRow>
-              <TableCell className="px-3 py-4 text-gray-500">
-                {loading ? "Laddar…" : "Ingen data – välj kurs/uppgift och ladda."}
-              </TableCell>
+              <TableHead className="px-2 py-2 text-left w-10%">Val</TableHead>
+              <TableHead className="px-0 py-2 text-center w-30%">Student</TableHead>
+              <TableHead className="px-0 py-2 text-center w-20%">Ladok betyg</TableHead>
+              <TableHead className="px-0 py-2 text-center w-20%">Datum</TableHead>
+              <TableHead className="px-0 py-2 text-center w-20%">Status</TableHead>
             </TableRow>
-          )}
-
-          {rows?.map((r) => {
-            const sent = isSent(r);
-            const disabled = sent || !r.personnummer;
-
-            return (
-              <TableRow
-                key={r.studentId}
-                className={`align-top transition ${sent ? "bg-gray-50 opacity-70" : ""}`}
-              >
-                <TableCell className="px-2 py-2">
-                  <input
-                    type="checkbox"
-                    checked={!!r.selected}
-                    onChange={() => onToggle(r.studentId)}
-                    disabled={disabled}
-                  />
-                </TableCell>
-                <TableCell className="text-center align-middle px-0 py-2">
-                  <div className="font-medium">{r.name}</div>
-                  <div className="text-xs text-gray-500">{r.studentId}</div>
-                </TableCell>
-                <TableCell className="text-center align-middle px-0 py-2">
-                  <Select
-                    className="border rounded-xl px-2 py-1"
-                    value={r.ladokBetygPreselect ?? ""}
-                    onChange={(e) => onSetGrade(r.studentId, e.target.value)}
-                    disabled={disabled}
-                  >
-                    <Option value="">(välj)</Option>
-                    {GRADE_OPTIONS.map((g) => (
-                      <Option key={g} value={g}>
-                        {g}
-                      </Option>
-                    ))}
-                  </Select>
-                </TableCell>
-                <TableCell className="px-0 py-2">
-                  <div className="flex items-center justify-center">
-                    <Input
-                      date
-                      className="h-8 w-35 rounded-xl border px-2 text-sm"
-                      value={r.datum}
-                      onChangeDate={(date) => onSetDate(r.studentId, date)}
-                      disabled={disabled}
-                    />
-                  </div>
-                </TableCell>
-                <TableCell className="align-middle text-center px-0 py-2">
-                  {sent ? (
-                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 border border-green-300">
-                      Klarmarkerad
-                    </span>
-                  ) : (
-                    <span className="inline-block px-3 py-1 text-xs rounded-full bg-red-50 text-red-700 border border-red-300">
-                      Ej klarmarkerad
-                    </span>
-                  )}
+          </TableHeader>
+          <TableBody>
+            {(!rows || rows.length === 0) && (
+              <TableRow>
+                <TableCell className="px-3 py-4 text-gray-500">
+                  {loading ? "Laddar…" : "Ingen data – välj kurs/uppgift och ladda."}
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            )}
+
+            {rows?.map((r) => {
+              const sent = isSent(r);
+              const disabled = sent || !r.personnummer;
+
+              return (
+                <TableRow
+                  key={r.studentId}
+                  className={`align-top transition ${sent ? "bg-gray-50 opacity-70" : ""}`}
+                >
+                  <TableCell className="px-2 py-2">
+                    <input
+                      type="checkbox"
+                      checked={!!r.selected}
+                      onChange={() => onToggle(r.studentId)}
+                      disabled={disabled}
+                    />
+                  </TableCell>
+                  <TableCell className="text-center align-middle px-0 py-2">
+                    <div className="font-medium">{r.name}</div>
+                    <div className="text-xs text-gray-500">{r.studentId}</div>
+                  </TableCell>
+                  <TableCell className="text-center align-middle px-0 py-2">
+                    <Select
+                      className="border rounded-xl px-2 py-1"
+                      value={r.ladokBetygPreselect ?? ""}
+                      onChange={(e) => onSetGrade(r.studentId, e.target.value)}
+                      disabled={disabled}
+                    >
+                      <Option value="">(välj)</Option>
+                      {GRADE_OPTIONS.map((g) => (
+                        <Option key={g} value={g}>
+                          {g}
+                        </Option>
+                      ))}
+                    </Select>
+                  </TableCell>
+                  <TableCell className="px-0 py-2">
+                    <div className="flex items-center justify-center">
+                      <Input
+                        date
+                        className="h-8 w-35 rounded-xl border px-2 text-sm"
+                        value={r.datum}
+                        onChangeDate={(date) => onSetDate(r.studentId, date)}
+                        disabled={disabled}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className="align-middle text-center px-0 py-2">
+                    {sent ? (
+                      <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 border border-green-300">
+                        Klarmarkerad
+                      </span>
+                    ) : (
+                      <span className="inline-block px-3 py-1 text-xs rounded-full bg-red-50 text-red-700 border border-red-300">
+                        Ej klarmarkerad
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

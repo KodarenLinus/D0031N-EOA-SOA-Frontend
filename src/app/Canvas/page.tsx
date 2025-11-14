@@ -114,10 +114,6 @@ export default function CanvasRosterToLadok() {
           setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          onReload={async () => {
-            await reloadModules();
-            await reloadRoster();
-          }}
           epokModules={epokModules}
           epokLoading={epokLoading}
         />
@@ -132,7 +128,6 @@ export default function CanvasRosterToLadok() {
 
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         {rosterLoading && <div className="text-sm text-gray-500">Laddar roster…</div>}
-
         <RosterTable
           rows={rows}
           loading={rosterLoading}

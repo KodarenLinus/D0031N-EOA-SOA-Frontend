@@ -2,7 +2,6 @@
 import * as React from "react";
 import type { EpokModule } from "@shared/src/rest/schema";
 import { Input } from "@shared/src/componets/UI/Input";
-import { Button } from "@shared/src/componets/UI/Button";
 import { Label } from "@shared/src/componets/UI/Label";
 import { Select } from "@shared/src/componets/UI/Select";
 import { Option } from "@shared/src/componets/UI/Option";
@@ -11,8 +10,7 @@ type Props = {
   kurskod: string;
   setKurskod: (v: string) => void;
   modulKod: string;
-  setModulKod: (v: string) => void;
-  onReload: () => void;                
+  setModulKod: (v: string) => void;           
   epokModules: EpokModule[];
   epokLoading?: boolean;
 };
@@ -22,7 +20,6 @@ export function Filters({
   setKurskod,
   modulKod,
   setModulKod,
-  onReload,
   epokModules,
   epokLoading,
 }: Props) {
@@ -46,7 +43,7 @@ export function Filters({
             </Label>
             <Input
               id="kurskod"
-              className="w-full rounded-xl border px-3 py-2 text-sm shadow-sm outline-none transition placeholder:text-gray-400"
+              className="w-full rounded-xl border px-3 py-2 mb-3 text-sm shadow-sm outline-none transition placeholder:text-gray-400"
               value={kurskod}
               onChange={(e) => {
                 setKurskod(e.target.value);
@@ -64,7 +61,7 @@ export function Filters({
             <div className="relative">
               <Select
                 id="module"
-                className="w-full appearance-none rounded-xl border px-3 py-2 pr-6 text-sm shadow-sm outline-none transition disabled:opacity-60"
+                className="w-full appearance-none rounded-xl border px-3 py-2 pr-6 mb-3 text-sm shadow-sm outline-none transition disabled:opacity-60"
                 value={modulKod}
                 onChange={(e) => setModulKod(e.target.value)}
                 disabled={epokLoading || epokModules.length === 0}
@@ -84,16 +81,6 @@ export function Filters({
                 <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" />
               </svg>
             </div>
-          </div>
-          <div className="sm:col-span-2">
-            <Button
-              type="button"
-              onClick={onReload}
-              disabled={epokLoading}
-              className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 border-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:opacity-90 active:opacity-80 disabled:opacity-60"
-            >
-              {epokLoading ? "Hämtar…" : "Ladda studenter"}
-            </Button>
           </div>
         </div>
       </div>
