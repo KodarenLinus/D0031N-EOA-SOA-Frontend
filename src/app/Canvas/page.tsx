@@ -114,10 +114,6 @@ export default function CanvasRosterToLadok() {
           setKurskod={setKurskod}
           modulKod={modulKod}
           setModulKod={setModulKod}
-          onReload={async () => {
-            await reloadModules();
-            await reloadRoster();
-          }}
           epokModules={epokModules}
           epokLoading={epokLoading}
         />
