@@ -28,7 +28,6 @@ function todayISO(date = new Date()) {
  * @return modules, loading, error, reload
  */
 export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
-  // State
   const [modules, setModules] = useState<EpokModule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +62,13 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     return m;
   }, [modules]);
 
-  return { modules, modulesByCode, loading, error, reload };
+  return { 
+    modules,
+    modulesByCode, 
+    loading, 
+    error, 
+    reload 
+  };
 }
 
 /**
@@ -160,8 +165,8 @@ export function useRoster(kurskod: string, modulkod: string) {
           ladokBetygPreselect: ladok?.ladokBetyg ?? null,
           datum: ladok?.datum ?? todayISO(),
           selected: false,
-          sent: ladok?.sent === true, // only true counts as sent
-          ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null, // get latest status
+          sent: ladok?.sent === true, 
+          ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
           registeredAt: null,
         };
       });

@@ -29,12 +29,13 @@ export function Toast({
 
   return (
     <div
-      className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-xl text-white 
+      className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-xl font-arial text-sm
         ${
-          type === "success" ? "bg-green-600" :
-          type === "error" ? "bg-red-600" :
-          type === "warning" ? "bg-yellow-500" :
-          "bg-blue-600"
+          type === "success" ? "bg-green-300 border-green-700 text-white " :
+          type === "error" ? "bg-red-100 border-red-700 text-white " :
+          type === "warning" ? "bg-yellow-100 border-yellow-700 text-white " :
+          type === "info" ? "bg-blue-100 border-blue-700 text-white " :
+          "bg-blue-100S text-white"
         }`}
     >
       {title && <p className="font-semibold">{title}</p>}
