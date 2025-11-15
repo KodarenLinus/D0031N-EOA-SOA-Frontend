@@ -80,3 +80,14 @@ export type EpokModule = {
   namn: string;
   aktiv: boolean;
 };
+
+export type studentitsResponse = {
+  studentId: string;
+  personnummer: string;
+  fornamn: string; 
+  efternamn: string
+};
+
+export type studentitsBatchResponse = {
+  getPersonnummerBatch: (studentIds: string[]) => Promise<studentitsResponse[]>;
+};
