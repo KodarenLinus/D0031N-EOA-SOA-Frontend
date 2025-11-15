@@ -108,10 +108,10 @@ export default function CanvasRosterToLadok() {
               </div>
             </div>
             <div>
-              <H1 className="text-3xl tracking-tight text-slate-900">
+              <H1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent">
                 Canvas Admin WS
               </H1>
-              <Span className="mt-1 text-sm text-slate-900/80">
+              <Span className="mt-1 text-sm bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent">
                 Snabb registrering av kursbetyg från Canvas till Ladok
               </Span>
             </div>

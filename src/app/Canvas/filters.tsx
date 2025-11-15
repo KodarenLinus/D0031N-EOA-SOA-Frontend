@@ -5,7 +5,7 @@ import { Input } from "@shared/src/componets/UI/Input";
 import { Label } from "@shared/src/componets/UI/Label";
 import { Select } from "@shared/src/componets/UI/Select";
 import { Option } from "@shared/src/componets/UI/Option";
-import { H1, H2} from "@shared/src/componets/typography/typography";
+import { H2} from "@shared/src/componets/typography/typography";
 
 type Props = {
   kurskod: string;
