@@ -13,9 +13,6 @@ import type {
   BaseRow,
 } from "./schema";
 
-// Grades you allow in UI (reusable)
-export const GRADE_OPTIONS = ["U", "G", "VG"] as const;
-
 // Lokal "dagens datum" i YYYY-MM-DD (inte UTC-slice)
 function todayISO(date = new Date()) {
   const y = date.getFullYear();

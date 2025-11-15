@@ -1,6 +1,5 @@
 'use client';
 import type { RosterRow } from "@shared/src/rest/schema";
-import { GRADE_OPTIONS } from "@shared/src/rest/hooks";
 import {
   Table,
   TableHeader,
@@ -23,6 +22,8 @@ type Props = {
   onSetGrade: (studentId: string, grade: string) => void;
   onSetDate: (studentId: string, date: string) => void;
 };
+
+const GRADE_OPTIONS = ["U", "G", "VG"] as const;
 
 function isSent(row: RosterRow): boolean {
   return row.sent === true;
