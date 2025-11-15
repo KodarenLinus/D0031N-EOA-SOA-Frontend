@@ -93,19 +93,31 @@ export default function CanvasRosterToLadok() {
 
   return (
     <div className="min-h-screen">
-      <Header>
+      <Header className="bg-gradient-to-r from-cyan-500 via-sky-600 to-[#12365a] shadow-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="grid h-16 w-16 place-items-center rounded-4xl bg-black text-3xl font-semibold text-cyan-300">
-              CS
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div
+                className="pointer-events-none absolute inset-0 rounded-full bg-white/40 blur-md opacity-60"
+                aria-hidden
+              />
+              <div className="flex h-20 w-20 items-center justify-center rounded-md bg-[#12365a] shadow-md">
+                <Span className="text-7xl font-serif text-white leading-none">
+                  L
+                </Span>
+              </div>
             </div>
-            <H1 className="pl-16">
-              Canvas Admin WS
-            </H1>
+            <div>
+              <H1 className="text-3xl tracking-tight text-slate-900">
+                Canvas Admin WS
+              </H1>
+              <Span className="mt-1 text-sm text-slate-900/80">
+                Snabb registrering av kursbetyg från Canvas till Ladok
+              </Span>
+            </div>
           </div>
         </div>
       </Header>
-
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
