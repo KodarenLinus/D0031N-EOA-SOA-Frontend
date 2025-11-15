@@ -12,7 +12,7 @@ import type {
   RosterItem,
   BaseRow,
   studentitsBatchResponse,
-  studentitsResponse
+  studentitsResponse,
 } from "./schema";
 
 // Lokal "dagens datum" i YYYY-MM-DD (inte UTC-slice)
@@ -32,7 +32,6 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reload function
   const reload = useCallback(async () => {
     if (!kurskod) {
       setModules([]);
@@ -51,24 +50,22 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     }
   }, [kurskod, onlyActive]);
 
-  // Effect to load on kurskod change
   useEffect(() => {
     reload();
   }, [reload]);
 
-  // Memoized map of modules by code
   const modulesByCode = useMemo(() => {
     const m = new Map<string, string>();
     for (const mod of modules) m.set(mod.modulkod, mod.namn);
     return m;
   }, [modules]);
 
-  return { 
+  return {
     modules,
-    modulesByCode, 
-    loading, 
-    error, 
-    reload 
+    modulesByCode,
+    loading,
+    error,
+    reload,
   };
 }
 
@@ -82,7 +79,7 @@ export function useRoster(kurskod: string, modulkod: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load Canvas roster and StudentITS personnummer
+  // Ladda Canvas + StudentITS när kurskod ändras
   useEffect(() => {
     if (!kurskod) {
       setBaseRows(null);
@@ -92,9 +89,11 @@ export function useRoster(kurskod: string, modulkod: string) {
 
     let cancelled = false;
 
+    // Load Canvas roster and enrich with StudentITS personnummer
     const loadBase = async () => {
       setLoading(true);
       setError(null);
+
       try {
         const canvasResp = (await CanvasApi.listRoster(kurskod)) as
           | CanvasRosterResponse
@@ -114,48 +113,26 @@ export function useRoster(kurskod: string, modulkod: string) {
         const studentIds = cleanCanvas.map((c) => c.studentId);
 
         let pnrByStudentId = new Map<string, string>();
+
         try {
-          if (typeof (StudentITSApi as any).getPersonnummerBatch === "function") {
-            const batch = await (StudentITSApi as any).getPersonnummerBatch(studentIds);
+            const apiWithBatch = StudentITSApi as unknown as {
+              getPersonnummerBatch: (studentIds: string[]) => Promise<studentitsResponse[]>;
+            };
+
+            const batch = await apiWithBatch.getPersonnummerBatch(studentIds);
+
             pnrByStudentId = new Map(
-              (batch as any[])
-                .map((r) => {
-                  const key =
-                    r.studentId ?? r.stud_id ?? r.user_id ?? r.username ?? r.id ?? null;
-                  const pnr = r.personnummer ?? null;
+              batch
+                .map((row) => {
+                  const key = row.studentId ?? null;
+                  const pnr = row.personnummer ?? null;
                   return key && pnr ? [String(key), String(pnr)] : null;
                 })
-                .filter(Boolean) as [string, string][]
+                .filter((pair): pair is [string, string] => pair !== null)
             );
-          } else {
-            const pairs = await Promise.all(
-              studentIds.map(async (studentId) => {
-                try {
-                  const res = await StudentITSApi.getPersonnummer(studentId);
-                  return [studentId, res?.personnummer ?? null] as [
-                    string,
-                    string | null
-                  ];
-                } catch {
-                  return [studentId, null] as [string, null];
-                }
-        if ("getPersonnummerBatch" in StudentITSApi && typeof (StudentITSApi as studentitsBatchResponse).getPersonnummerBatch === "function") {
-          const batch = await (StudentITSApi as studentitsBatchResponse).getPersonnummerBatch(studentIds);
-          pnrByStudentId = new Map(
-            (batch as studentitsResponse[])
-              .map((row) => {
-                const key = row.studentId ?? null;
-                const pnr = row.personnummer ?? null;
-                return key && pnr ? [String(key), String(pnr)] : null;
-              })
-            );
-            pnrByStudentId = new Map(
-              pairs.filter(([, p]) => !!p) as [string, string][]
-            );
+          } catch (e) {
+            console.warn("StudentITS lookup failed", e);
           }
-        } catch (e) {
-          console.warn("StudentITS lookup failed", e);
-        }
 
         if (cancelled) return;
 
@@ -167,9 +144,13 @@ export function useRoster(kurskod: string, modulkod: string) {
 
         setBaseRows(base);
       } catch (e: any) {
-        if (!cancelled) setError(e?.message || "Kunde inte hämta roster");
+        if (!cancelled) {
+          setError(e?.message || "Kunde inte hämta roster");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -180,6 +161,7 @@ export function useRoster(kurskod: string, modulkod: string) {
     };
   }, [kurskod]);
 
+  // Ladda Ladok när baseRows + modulkod är klara
   const reload = useCallback(async () => {
     if (!kurskod || !modulkod || !baseRows) {
       setRows(null);
@@ -200,21 +182,26 @@ export function useRoster(kurskod: string, modulkod: string) {
         if (dto.personnummer) ladokByPnr.set(String(dto.personnummer), dto);
       }
 
-      const table: RosterRow[] = baseRows.map(({ studentId, name, personnummer }) => {
-        const ladok = personnummer ? ladokByPnr.get(personnummer) : undefined;
+      const table: RosterRow[] = baseRows.map(
+        ({ studentId, name, personnummer }) => {
+          const ladok = personnummer
+            ? ladokByPnr.get(personnummer)
+            : undefined;
 
-        return {
-          studentId,
-          name,
-          personnummer,
-          ladokBetygPreselect: ladok?.ladokBetyg ?? null,
-          datum: ladok?.datum ?? todayISO(),
-          selected: false,
-          sent: ladok?.sent === true,
-          ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
-          registeredAt: null,
-        };
-      });
+          return {
+            studentId,
+            name,
+            personnummer,
+            ladokBetygPreselect: ladok?.ladokBetyg ?? null,
+            datum: ladok?.datum ?? todayISO(),
+            selected: false,
+            sent: ladok?.sent === true,
+            ladokStatus:
+              ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
+            registeredAt: null,
+          };
+        }
+      );
 
       setRows(table);
     } catch (e: unknown) {
@@ -256,8 +243,9 @@ export function useRoster(kurskod: string, modulkod: string) {
   const setDate = useCallback(
     (studentId: string, date: string) =>
       setRows((prev) =>
-        prev?.map((r) => (r.studentId === studentId ? { ...r, datum: date } : r)) ??
-        prev
+        prev?.map((r) =>
+          r.studentId === studentId ? { ...r, datum: date } : r
+        ) ?? prev
       ),
     []
   );
@@ -283,14 +271,12 @@ export function useBulkRegister() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Register function –  call LadokApi.postResult for each payload
   const register = useCallback(async (payloads: LadokResultRequestDto[]) => {
     setBusy(true);
     setMessage(null);
-    let ok = 0,
-      fail = 0;
+    let ok = 0;
+    let fail = 0;
 
-    // Loop payloads and call LadokApi.postResult
     for (const body of payloads) {
       try {
         const res = await LadokApi.postResult(body);
@@ -306,15 +292,12 @@ export function useBulkRegister() {
         fail++;
       }
     }
+
     setBusy(false);
     setMessage(`Klar: ${ok} registrerade, ${fail} fel`);
-    return { 
-      ok, 
-      fail 
-    };
+    return { ok, fail };
   }, []);
 
-  // Return state and register function
   return { register, busy, message, setMessage };
 }
 
@@ -327,11 +310,15 @@ export function useRowsToLadokPayloads(
   kurskod: string,
   modulkod: string
 ): LadokResultRequestDto[] {
-  // Filter and map to LadokResultRequestDto
   return rows
     .filter(
-      (r) => r.selected && !!r.personnummer && !!r.ladokBetygPreselect && !r.sent
-    ).map((r) => ({
+      (r) =>
+        r.selected &&
+        !!r.personnummer &&
+        !!r.ladokBetygPreselect &&
+        !r.sent
+    )
+    .map((r) => ({
       personnummer: r.personnummer!,
       kurskod,
       modulkod,
