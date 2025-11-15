@@ -93,7 +93,7 @@ export default function CanvasRosterToLadok() {
 
   return (
     <div className="min-h-screen">
-      <Header className="bg-gradient-to-r from-cyan-500 via-sky-600 to-[#12365a] shadow-md">
+      <Header>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -148,7 +148,7 @@ export default function CanvasRosterToLadok() {
 
         <div className="flex items-center gap-3">
           <Button
-            className="bg-cyan-400 text-white rounded-2xl border-cyan-500 shadow-sm hover:opacity-70 disabled:opacity-50"
+            className="mb-4"
             onClick={onRegisterSelected}
             disabled={busy || !modulKod || ready.length === 0}
           >
