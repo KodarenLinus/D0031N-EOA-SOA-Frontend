@@ -25,18 +25,17 @@ export function Filters({
 }: Props) {
   React.useEffect(() => {
     if (epokModules.length === 0) return;
-    const exists = epokModules.some((m) => m.modulkod === modulKod);
+    const exists = epokModules.some((module) => module.modulkod === modulKod);
     if (!modulKod || !exists) setModulKod(epokModules[0].modulkod);
   }, [epokModules, modulKod, setModulKod]);
 
   return (
     <div className="mx-auto max-w-6xl">
       <div className="rounded-2xl bg-white-100 shadow-sm">
-        <div className="px-5 py-4 bg-cyan-100 rounded-t-2xl">
+        <div className="px-5 py-4 bg-cyan-400 rounded-t-2xl">
           <h1 className="text-sm text-center font-semibold">Filter</h1>
         </div>
         <div className="grid gap-4 px-5 py-5 sm:grid-cols-2">
-          {/* Kurskod */}
           <div className="sm:col-span-1">
             <Label htmlFor="kurskod" className="mb-1 block text-xs font-medium text-gray-700">
               Kurskod
@@ -47,7 +46,6 @@ export function Filters({
               value={kurskod}
               onChange={(e) => {
                 setKurskod(e.target.value);
-                // rensa modul vid byte av kurskod så man inte har fel förval
                 setModulKod("");
               }}
               placeholder="t.ex. D0031N"
@@ -66,9 +64,9 @@ export function Filters({
                 onChange={(e) => setModulKod(e.target.value)}
                 disabled={epokLoading || epokModules.length === 0}
               >
-                {epokModules.map((m) => (
-                  <Option key={m.modulkod} value={m.modulkod}>
-                    {m.modulkod}
+                {epokModules.map((module) => (
+                  <Option key={module.modulkod} value={module.modulkod}>
+                    {module.modulkod}
                   </Option>
                 ))}
               </Select>
