@@ -62,6 +62,9 @@ export default function CanvasRosterToLadok() {
     setMessage 
   } = useBulkRegister();
 
+  // Get the payload generator function from the hook at the top level
+  const getRowsToLadokPayloads = useRowsToLadokPayloads;
+
   // Renderer for register button
   const onRegisterSelected = async () => {
     if (!rows || !modulKod) return;
@@ -71,7 +74,7 @@ export default function CanvasRosterToLadok() {
       (row) => row.selected && !!row.personnummer && !!row.ladokBetygPreselect && !!row.datum && !row.sent
     );
     try {
-      const payloads = useRowsToLadokPayloads(validRows, kurskod, modulKod);
+      const payloads = getRowsToLadokPayloads(validRows, kurskod, modulKod);
       const res = await register(payloads);
 
       if (res.ok > 0) {
@@ -86,8 +89,12 @@ export default function CanvasRosterToLadok() {
         );
       }
       await reloadRoster();
-    } catch (e: any) {
-      setMessage(e?.message ?? "Något gick fel vid registrering.");
+    } catch (e: unknown) {
+      if (e && typeof e === "object" && "message" in e && typeof (e as { message: string }).message === "string") {
+        setMessage((e as { message: string }).message);
+      } else {
+        setMessage("Något gick fel vid registrering.");
+      }
     }
   };
 

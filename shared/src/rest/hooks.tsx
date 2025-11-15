@@ -11,6 +11,8 @@ import type {
   CanvasRosterResponse,
   RosterItem,
   BaseRow,
+  studentitsBatchResponse,
+  studentitsResponse
 } from "./schema";
 
 // Lokal "dagens datum" i YYYY-MM-DD (inte UTC-slice)
@@ -41,8 +43,9 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     try {
       const data = await EpokApi.listModules(kurskod, onlyActive);
       setModules(data);
-    } catch (e: any) {
-      setError(e.message || "Kunde inte hämta Epok-moduler");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg || "Kunde inte hämta Epok-moduler");
     } finally {
       setLoading(false);
     }
@@ -136,6 +139,14 @@ export function useRoster(kurskod: string, modulkod: string) {
                 } catch {
                   return [studentId, null] as [string, null];
                 }
+        if ("getPersonnummerBatch" in StudentITSApi && typeof (StudentITSApi as studentitsBatchResponse).getPersonnummerBatch === "function") {
+          const batch = await (StudentITSApi as studentitsBatchResponse).getPersonnummerBatch(studentIds);
+          pnrByStudentId = new Map(
+            (batch as studentitsResponse[])
+              .map((row) => {
+                const key = row.studentId ?? null;
+                const pnr = row.personnummer ?? null;
+                return key && pnr ? [String(key), String(pnr)] : null;
               })
             );
             pnrByStudentId = new Map(
@@ -206,8 +217,9 @@ export function useRoster(kurskod: string, modulkod: string) {
       });
 
       setRows(table);
-    } catch (e: any) {
-      setError(e?.message || "Kunde inte hämta Ladok-roster");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Kunde inte hämta roster";
+      setError(msg);
     } finally {
       setLoading(false);
     }
