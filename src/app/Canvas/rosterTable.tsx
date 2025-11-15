@@ -32,8 +32,8 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
   return (
     <div>
       <Button
-        className="bg-cyan-400 border-cyan-600 shadow-sm mb-2 text-sm text-white rounded-2xl hover:opacity-70 active:scale-95"
-        onClick={() => {
+          className="mb-4"
+          onClick={() => {
           rows?.forEach((row) => {
             if (!isSent(row)) {
               onToggle(row.studentId);
@@ -45,7 +45,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
       />
       <div className="rounded-2xl shadow overflow-auto">
         <Table className="min-w-full text-sm">
-          <TableHeader className="bg-cyan-400">
+          <TableHeader className="bg-[#12365a] text-white">
             <TableRow>  
               <TableHead className="px-2 py-4 text-left w-10%">Val</TableHead>
               <TableHead className="px-0 py-4 text-center w-30%">Student</TableHead>
