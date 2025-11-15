@@ -10,6 +10,7 @@ import type {
   LadokRosterItemDto,
   CanvasRosterResponse,
   RosterItem,
+  BaseRow,
 } from "./schema";
 
 // Grades you allow in UI (reusable)
@@ -76,13 +77,103 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
  * @return rows, loading, error, reload, toggleRow, setGrade, setDate, setRows
  */
 export function useRoster(kurskod: string, modulkod: string) {
+  const [baseRows, setBaseRows] = useState<BaseRow[] | null>(null);
   const [rows, setRows] = useState<RosterRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reload function to fetch and build roster  
+  // Load Canvas roster and StudentITS personnummer
+  useEffect(() => {
+    if (!kurskod) {
+      setBaseRows(null);
+      setRows(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBase = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const canvasResp = (await CanvasApi.listRoster(kurskod)) as
+          | CanvasRosterResponse
+          | RosterItem[];
+
+        const canvasRoster: RosterItem[] = Array.isArray(canvasResp)
+          ? canvasResp
+          : canvasResp?.roster ?? [];
+
+        const cleanCanvas = canvasRoster
+          .map((c) => ({
+            studentId: String(c.studentId),
+            name: String(c.name ?? "").trim(),
+          }))
+          .filter((c) => !!c.studentId && !!c.name);
+
+        const studentIds = cleanCanvas.map((c) => c.studentId);
+
+        let pnrByStudentId = new Map<string, string>();
+        try {
+          if (typeof (StudentITSApi as any).getPersonnummerBatch === "function") {
+            const batch = await (StudentITSApi as any).getPersonnummerBatch(studentIds);
+            pnrByStudentId = new Map(
+              (batch as any[])
+                .map((r) => {
+                  const key =
+                    r.studentId ?? r.stud_id ?? r.user_id ?? r.username ?? r.id ?? null;
+                  const pnr = r.personnummer ?? null;
+                  return key && pnr ? [String(key), String(pnr)] : null;
+                })
+                .filter(Boolean) as [string, string][]
+            );
+          } else {
+            const pairs = await Promise.all(
+              studentIds.map(async (studentId) => {
+                try {
+                  const res = await StudentITSApi.getPersonnummer(studentId);
+                  return [studentId, res?.personnummer ?? null] as [
+                    string,
+                    string | null
+                  ];
+                } catch {
+                  return [studentId, null] as [string, null];
+                }
+              })
+            );
+            pnrByStudentId = new Map(
+              pairs.filter(([, p]) => !!p) as [string, string][]
+            );
+          }
+        } catch (e) {
+          console.warn("StudentITS lookup failed", e);
+        }
+
+        if (cancelled) return;
+
+        const base: BaseRow[] = cleanCanvas.map(({ studentId, name }) => ({
+          studentId,
+          name,
+          personnummer: pnrByStudentId.get(studentId) ?? null,
+        }));
+
+        setBaseRows(base);
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || "Kunde inte hämta roster");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadBase();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [kurskod]);
+
   const reload = useCallback(async () => {
-    if (!kurskod || !modulkod) {
+    if (!kurskod || !modulkod || !baseRows) {
       setRows(null);
       return;
     }
@@ -91,71 +182,17 @@ export function useRoster(kurskod: string, modulkod: string) {
     setError(null);
 
     try {
-      const canvasResp = (await CanvasApi.listRoster(kurskod)) as
-        | CanvasRosterResponse
-        | RosterItem[];
-
-      // Normalize response
-      const canvasRoster: RosterItem[] = Array.isArray(canvasResp)
-        ? canvasResp
-        : (canvasResp?.roster ?? []);
-
-      // Clean Canvas data
-      const cleanCanvas = canvasRoster
-        .map((c) => ({
-          studentId: String(c.studentId),
-          name: String(c.name ?? "").trim(),
-        }))
-        .filter((c) => !!c.studentId && !!c.name);
-
-      const studentIds = cleanCanvas.map((c) => c.studentId);
-
-      // StudentITS – get personnummer
-      let pnrByStudentId = new Map<string, string>();
-      try {
-        if (typeof (StudentITSApi as any).getPersonnummerBatch === "function") {
-          const batch = await (StudentITSApi as any).getPersonnummerBatch(studentIds);
-          pnrByStudentId = new Map(
-            (batch as any[])
-              .map((r) => {
-                const key = r.studentId ?? r.stud_id ?? r.user_id ?? r.username ?? r.id ?? null;
-                const pnr = r.personnummer ?? null;
-                return key && pnr ? [String(key), String(pnr)] : null;
-              })
-              .filter(Boolean) as [string, string][]
-          );
-        } else {
-          const pairs = await Promise.all(
-            studentIds.map(async (studentId) => {
-              try {
-                const res = await StudentITSApi.getPersonnummer(studentId);
-                return [studentId, res?.personnummer ?? null] as [string, string | null];
-              } catch {
-                return [studentId, null] as [string, null];
-              }
-            })
-          );
-          pnrByStudentId = new Map(pairs.filter(([, p]) => !!p) as [string, string][]);
-        }
-      } catch (e) {
-        console.warn("StudentITS lookup failed", e);
-      }
-
-      // Ladok roster
       const ladokRoster = (await LadokApi.getRoster(
         kurskod,
         modulkod
       )) as LadokRosterItemDto[];
 
-      // Map Ladok by personnummer
       const ladokByPnr = new Map<string, LadokRosterItemDto>();
       for (const dto of ladokRoster) {
         if (dto.personnummer) ladokByPnr.set(String(dto.personnummer), dto);
       }
 
-      // Build table rows
-      const table: RosterRow[] = cleanCanvas.map(({ studentId, name }) => {
-        const personnummer = pnrByStudentId.get(studentId) ?? null;
+      const table: RosterRow[] = baseRows.map(({ studentId, name, personnummer }) => {
         const ladok = personnummer ? ladokByPnr.get(personnummer) : undefined;
 
         return {
@@ -165,26 +202,28 @@ export function useRoster(kurskod: string, modulkod: string) {
           ladokBetygPreselect: ladok?.ladokBetyg ?? null,
           datum: ladok?.datum ?? todayISO(),
           selected: false,
-          sent: ladok?.sent === true, 
+          sent: ladok?.sent === true,
           ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
           registeredAt: null,
         };
       });
 
       setRows(table);
-    } catch (e: Error | any) {
-      setError(e?.message || "Kunde inte hämta roster");
+    } catch (e: any) {
+      setError(e?.message || "Kunde inte hämta Ladok-roster");
     } finally {
       setLoading(false);
     }
-  }, [kurskod, modulkod]);
+  }, [kurskod, modulkod, baseRows]);
 
-  // Effect to load on kurskod change
   useEffect(() => {
-    reload();
-  }, [reload]);
+    if (baseRows && modulkod) {
+      reload();
+    } else {
+      setRows(null);
+    }
+  }, [baseRows, modulkod, reload]);
 
-  // Helper to toggle row selection
   const toggleRow = useCallback(
     (studentId: string) =>
       setRows((prev) =>
@@ -195,39 +234,34 @@ export function useRoster(kurskod: string, modulkod: string) {
     []
   );
 
-  // Helper show grade in ladok if already sent
   const setGrade = useCallback(
     (studentId: string, grade: string) =>
       setRows((prev) =>
         prev?.map((r) =>
-          r.studentId === studentId
-            ? { ...r, ladokBetygPreselect: grade }
-            : r
+          r.studentId === studentId ? { ...r, ladokBetygPreselect: grade } : r
         ) ?? prev
       ),
     []
   );
 
-  // Helper show date in ladok if already sent
   const setDate = useCallback(
     (studentId: string, date: string) =>
       setRows((prev) =>
-        prev?.map((r) =>
-          r.studentId === studentId ? { ...r, datum: date } : r
-        ) ?? prev
+        prev?.map((r) => (r.studentId === studentId ? { ...r, datum: date } : r)) ??
+        prev
       ),
     []
   );
 
-  return { 
-    rows, 
-    loading, 
-    error, 
-    reload, 
-    toggleRow, 
-    setGrade, 
-    setDate, 
-    setRows 
+  return {
+    rows,
+    loading,
+    error,
+    reload,
+    toggleRow,
+    setGrade,
+    setDate,
+    setRows,
   };
 }
 

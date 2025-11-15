@@ -25,6 +25,12 @@ export type CanvasRosterResponse = {
 /**
  * UI-ready roster row
  */
+// --- Base row used for merging data sources ---
+export type BaseRow = {
+  studentId: string;
+  name: string;
+  personnummer: string | null;
+};
 // --- Roster table row ---
 export type RosterRow = {
   studentId: string;
