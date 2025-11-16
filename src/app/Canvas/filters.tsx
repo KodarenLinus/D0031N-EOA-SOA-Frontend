@@ -33,7 +33,7 @@ export function Filters({
   return (
     <div className="mx-auto max-w-6xl">
       <div className="rounded-2xl bg-white-100 shadow-sm">
-        <div className="px-5 py-4 bg-[#12365a] rounded-t-2xl">
+        <div className="px-5 py-4 bg-primary-soft rounded-t-2xl">
           <H2 className="text-xl text-center text-white font-semibold">Filter</H2>
         </div>
         <div className="grid gap-4 px-5 py-5 sm:grid-cols-2">

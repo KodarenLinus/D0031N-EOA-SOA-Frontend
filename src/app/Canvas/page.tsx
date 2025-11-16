@@ -109,7 +109,7 @@ export default function CanvasRosterToLadok() {
                 className="pointer-events-none absolute inset-0 rounded-full bg-white/25 blur-md opacity-60"
                 aria-hidden
               />
-              <div className="flex h-20 w-20 items-center justify-center rounded-md bg-[#12365a] shadow-md">
+              <div className="flex h-20 w-20 items-center justify-center rounded-md bg-primary shadow-md">
                 <Span className="text-7xl font-serif text-white leading-none">
                   L
                 </Span>

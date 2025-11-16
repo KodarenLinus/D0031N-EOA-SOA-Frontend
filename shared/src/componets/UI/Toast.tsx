@@ -31,11 +31,11 @@ export function Toast({
     <div
       className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-xl font-arial text-sm
         ${
-          type === "success" ? "bg-green-300 border-green-700 text-white " :
-          type === "error" ? "bg-red-100 border-red-700 text-white " :
-          type === "warning" ? "bg-yellow-100 border-yellow-700 text-white " :
-          type === "info" ? "bg-blue-100 border-blue-700 text-white " :
-          "bg-blue-100S text-white"
+          type === "success" ? "bg-success border-success-dark text-white " :
+          type === "error" ? "bg-error border-error-dark text-white " :
+          type === "warning" ? "bg-warning border-warning-dark text-white " :
+          type === "info" ? "bg-info border-info-dark text-white " :
+          "bg-info text-white"
         }`}
     >
       {title && <p className="font-semibold">{title}</p>}

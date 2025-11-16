@@ -8,7 +8,7 @@ import {
   TableHead,
   TableCell,
 } from "@shared/src/componets/UI/Table";
-import { Input } from "@shared/src/componets/UI/Input";
+import { Input, InputCheckbox } from "@shared/src/componets/UI/Input";
 import { Select } from "@shared/src/componets/UI/Select";
 import { Option } from "@shared/src/componets/UI/Option";
 import { Button } from "@shared/src/componets/UI/Button";
@@ -58,7 +58,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
       />
       <div className="rounded-2xl shadow overflow-auto">
         <Table className="min-w-full text-sm">
-          <TableHeader className="bg-[#12365a] text-white">
+          <TableHeader className="bg-primary-soft text-white">
             <TableRow>  
               <TableHead className="px-2 py-4 text-left w-10%">Val</TableHead>
               <TableHead className="px-0 py-4 text-center w-30%">Student</TableHead>
@@ -86,8 +86,7 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                   className={`align-top transition ${sent ? "bg-gray-50 opacity-70" : ""}`}
                 >
                   <TableCell className="px-2 py-2">
-                    <input
-                      type="checkbox"
+                    <InputCheckbox
                       checked={!!row.selected}
                       onChange={() => onToggle(row.studentId)}
                       disabled={disabled}
