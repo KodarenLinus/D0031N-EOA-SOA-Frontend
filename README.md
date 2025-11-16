@@ -12,7 +12,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000/Canvas](http://localhost:3000/Canvas) with your browser to see the result.
+Open [http://localhost:3000/Canvas](http://localhost:3000/Canvas) with your browser to see ws.
 
 
 ## Packages you might have to install to run this project (yarn and npm command-line)
