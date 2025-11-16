@@ -8,13 +8,11 @@ import type {
   RosterRow,
   LadokResultRequestDto,
   LadokRosterItemDto,
-  CanvasRosterResponse,
-  RosterItem,
+  CanvasRosterItem,
   BaseRow,
   studentitsResponse,
 } from "./schema";
-
-// Lokal "dagens datum" i YYYY-MM-DD (inte UTC-slice)
+ 
 function todayISO(date = new Date()) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -23,6 +21,7 @@ function todayISO(date = new Date()) {
 }
 
 /**
+ * Custom hook 
  * Epok modules for a course code (Epok)
  * @return modules, loading, error, reload
  */
@@ -41,7 +40,7 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     try {
       const data = await EpokApi.listModules(kurskod, onlyActive);
       setModules(data);
-    } catch (e: unknown) {
+    } catch (e: EpokModule | unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg || "Kunde inte hämta Epok-moduler");
     } finally {
@@ -49,6 +48,7 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
     }
   }, [kurskod, onlyActive]);
 
+  // Reload when kurskod changes
   useEffect(() => {
     reload();
   }, [reload]);
@@ -69,6 +69,7 @@ export function useEpokModules(kurskod: string, onlyActive: boolean = true) {
 }
 
 /**
+ * Custom hook
  * Roster (Canvas -> StudentITS -> Ladok)
  * @return rows, loading, error, reload, toggleRow, setGrade, setDate, setRows
  */
@@ -78,14 +79,13 @@ export function useRoster(kurskod: string, modulkod: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ladda Canvas + StudentITS när kurskod ändras
+  // Loads Canvas roster + StudentITS personnummer
   useEffect(() => {
     if (!kurskod) {
       setBaseRows(null);
       setRows(null);
       return;
     }
-
     let cancelled = false;
 
     // Load Canvas roster and enrich with StudentITS personnummer
@@ -94,23 +94,20 @@ export function useRoster(kurskod: string, modulkod: string) {
       setError(null);
 
       try {
-        const canvasResp = (await CanvasApi.listRoster(kurskod)) as
-          | CanvasRosterResponse
-          | RosterItem[];
+        const canvasResp = (await CanvasApi.listRoster(kurskod)) as CanvasRosterItem[];
 
-        const canvasRoster: RosterItem[] = Array.isArray(canvasResp)
+        const canvasRoster: CanvasRosterItem[] = Array.isArray(canvasResp)
           ? canvasResp
-          : canvasResp?.roster ?? [];
+          : canvasResp?.['roster'] ?? [];
 
         const cleanCanvas = canvasRoster
-          .map((c) => ({
-            studentId: String(c.studentId),
-            name: String(c.name ?? "").trim(),
+          .map((canvas) => ({
+            studentId: String(canvas.studentId),
+            name: String(canvas.name ?? "").trim(),
           }))
-          .filter((c) => !!c.studentId && !!c.name);
+          .filter((canvas) => !!canvas.studentId && !!canvas.name);
 
-        const studentIds = cleanCanvas.map((c) => c.studentId);
-
+        const studentIds = cleanCanvas.map((canvas) => canvas.studentId);
         let pnrByStudentId = new Map<string, string>();
 
         try {
@@ -147,7 +144,6 @@ export function useRoster(kurskod: string, modulkod: string) {
         }
       }
     };
-
     loadBase();
 
     return () => {
@@ -155,13 +151,12 @@ export function useRoster(kurskod: string, modulkod: string) {
     };
   }, [kurskod]);
 
-  // Ladda Ladok när baseRows + modulkod är klara
+  // Loads Ladok roster and merges with baseRows
   const reload = useCallback(async () => {
     if (!kurskod || !modulkod || !baseRows) {
       setRows(null);
       return;
     }
-
     setLoading(true);
     setError(null);
 
@@ -190,8 +185,7 @@ export function useRoster(kurskod: string, modulkod: string) {
             datum: ladok?.datum ?? todayISO(),
             selected: false,
             sent: ladok?.sent === true,
-            ladokStatus:
-              ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
+            ladokStatus: ladok?.ladokStatus ?? ladok?.registreringsStatus ?? null,
             registeredAt: null,
           };
         }
@@ -217,28 +211,30 @@ export function useRoster(kurskod: string, modulkod: string) {
   const toggleRow = useCallback(
     (studentId: string) =>
       setRows((prev) =>
-        prev?.map((r) =>
-          r.studentId === studentId ? { ...r, selected: !r.selected } : r
+        prev?.map((row) =>
+          row.studentId === studentId ? { ...row, selected: !row.selected } : row
         ) ?? prev
       ),
     []
   );
 
+  // Set grade for a row
   const setGrade = useCallback(
     (studentId: string, grade: string) =>
       setRows((prev) =>
-        prev?.map((r) =>
-          r.studentId === studentId ? { ...r, ladokBetygPreselect: grade } : r
+        prev?.map((row) =>
+          row.studentId === studentId ? { ...row, ladokBetygPreselect: grade } : row
         ) ?? prev
       ),
     []
   );
 
+  // Set date for a row
   const setDate = useCallback(
     (studentId: string, date: string) =>
       setRows((prev) =>
-        prev?.map((r) =>
-          r.studentId === studentId ? { ...r, datum: date } : r
+        prev?.map((row) =>
+          row.studentId === studentId ? { ...row, datum: date } : row
         ) ?? prev
       ),
     []
@@ -289,10 +285,16 @@ export function useBulkRegister() {
 
     setBusy(false);
     setMessage(`Klar: ${ok} registrerade, ${fail} fel`);
+
     return { ok, fail };
   }, []);
 
-  return { register, busy, message, setMessage };
+  return { 
+    register, 
+    busy, 
+    message, 
+    setMessage 
+  };
 }
 
 /**
@@ -306,17 +308,17 @@ export function useRowsToLadokPayloads(
 ): LadokResultRequestDto[] {
   return rows
     .filter(
-      (r) =>
-        r.selected &&
-        !!r.personnummer &&
-        !!r.ladokBetygPreselect &&
-        !r.sent
+      (row) =>
+        row.selected &&
+        !!row.personnummer &&
+        !!row.ladokBetygPreselect &&
+        !row.sent
     )
-    .map((r) => ({
-      personnummer: r.personnummer!,
+    .map((row) => ({
+      personnummer: row.personnummer!,
       kurskod,
       modulkod,
-      datum: r.datum,
-      betyg: r.ladokBetygPreselect!,
+      datum: row.datum,
+      betyg: row.ladokBetygPreselect!,
     }));
 }

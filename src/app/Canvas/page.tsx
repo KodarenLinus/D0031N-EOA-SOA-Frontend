@@ -20,18 +20,8 @@ import { H1, Span } from "@shared/src/componets/typography/typography";
 export default function CanvasRosterToLadok() {
   const [kurskod, setKurskod] = useState("");
   const [modulKod, setModulKod] = useState("");
-
   const {modules: epokModules, loading: epokLoading} = useEpokModules(kurskod, true);
-
-  const {
-    rows,
-    loading: rosterLoading,
-    reload: reloadRoster,
-    toggleRow,
-    setGrade,
-    setDate,
-    setRows,
-  } = useRoster(kurskod, modulKod);
+  const {rows, loading: rosterLoading, reload: reloadRoster, toggleRow, setGrade, setDate, setRows} = useRoster(kurskod, modulKod);
 
   // Reset modulKod when kurskod changes
   useEffect(() => {
@@ -47,12 +37,10 @@ export default function CanvasRosterToLadok() {
 
   // Selection/validation
   const selected = useMemo(() => rows?.filter((row) => row.selected) ?? [], [rows]);
-  const ready = useMemo(
-    () =>
-      selected.filter(
-        (row) => !!row.personnummer && !!row.ladokBetygPreselect && !!row.datum && !row.sent
-      ),
-    [selected]
+  const ready = useMemo(() =>
+    selected.filter(
+      (row) => !!row.personnummer && !!row.ladokBetygPreselect && !!row.datum && !row.sent
+    ), [selected]
   );
   
   // Bulk register
@@ -106,7 +94,7 @@ export default function CanvasRosterToLadok() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div
-                className="pointer-events-none absolute inset-0 rounded-full bg-white/25 blur-md opacity-60"
+                className="pointer-events-none absolute inset-0 rounded-full bg-white/25 blur-md opacity-40"
                 aria-hidden
               />
               <div className="flex h-20 w-20 items-center justify-center rounded-md bg-primary shadow-md">
