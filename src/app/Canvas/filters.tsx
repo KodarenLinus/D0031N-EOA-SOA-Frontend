@@ -52,7 +52,7 @@ export function Filters({
             />
           </div>
           <div className="sm:col-span-1">
-            <Label htmlFor="module" className="mb-1 block text-xs font-medium text-gray-700">
+            <Label className="mb-1 block text-xs font-medium text-gray-700">
               Ladok-modul (Epok)
             </Label>
             <div className="relative">
