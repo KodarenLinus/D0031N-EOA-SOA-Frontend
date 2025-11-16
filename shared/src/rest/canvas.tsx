@@ -4,10 +4,11 @@ import type { RosterItem } from "./schema";
  * Canvas REST-klient (matchar våra Spring controllers)
  */
 const API = () => getApiBase();
+const CANVAS_BASE = `${API()}/canvas`;
 
 export const CanvasApi = {
   listRoster: (kurskod: string) =>
     jsonFetch<RosterItem[]>(
-      `${API()}/canvas/courses/${encodeURIComponent(kurskod)}/roster`
+      `${CANVAS_BASE}/courses/${encodeURIComponent(kurskod)}/roster`
     ),
 };
