@@ -1,15 +1,15 @@
 /**
+ * Shared REST API schema types
+ * Here we define all types used in the various REST clients
+ */
+
+/**
  * Canvas Schema types
  */
 // --- Canvas roster item type ---
-export type RosterItem = {
+export type CanvasRosterItem = {
   studentId: string;          
   name: string;
-};
-
-// --- Canvas roster response ---
-export type CanvasRosterResponse = {
-  roster: RosterItem[];
 };
 
 /**
