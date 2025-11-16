@@ -26,5 +26,10 @@ npm install tailwind-merge
 yarn add class-variance-authority
 # or
 npm install class-variance-authority
+
+# @tanstack/react-table
+yarn add @tanstack/react-table
+# or
+npm install @tanstack/react-table
 ```
 
