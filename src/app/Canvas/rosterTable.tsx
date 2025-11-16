@@ -33,16 +33,28 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
   return (
     <div>
       <Button
-          className="mb-4"
+          className="mb-4 mr-2"
           onClick={() => {
           rows?.forEach((row) => {
-            if (!isSent(row)) {
+            if (!isSent(row) && row.selected === false) {
               onToggle(row.studentId);
             }
           });
         }}
         disabled={!rows || rows.length === 0}
-        children="Markera / avmarkera alla"
+        children="Markera alla"
+      />
+      <Button
+          className="mb-4 mr-2"
+          onClick={() => {
+          rows?.forEach((row) => {
+            if (!isSent(row) && row.selected === true) {
+              onToggle(row.studentId);
+            }
+          });
+        }}
+        disabled={!rows || rows.length === 0}
+        children="Avmarkera alla"
       />
       <div className="rounded-2xl shadow overflow-auto">
         <Table className="min-w-full text-sm">

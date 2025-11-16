@@ -60,7 +60,7 @@ export function Filters({
             <div className="relative">
               <Select
                 id="module"
-                className="w-full appearance-none rounded-xl border px-3 py-2 pr-6 mb-3 text-sm shadow-sm outline-none transition disabled:opacity-60"
+                className="w-full rounded-xl border px-3 py-2 pr-6 mb-3 text-sm shadow-sm transition disabled:opacity-60"
                 value={modulKod}
                 onChange={(e) => setModulKod(e.target.value)}
                 disabled={epokLoading || epokModules.length === 0}
@@ -71,14 +71,6 @@ export function Filters({
                   </Option>
                 ))}
               </Select>
-              <svg
-                aria-hidden
-                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" />
-              </svg>
             </div>
           </div>
         </div>

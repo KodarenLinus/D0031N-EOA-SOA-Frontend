@@ -1,5 +1,9 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { 
+  useState, 
+  useEffect, 
+  useMemo 
+} from "react";
 import {
   useRoster,
   useBulkRegister,
@@ -14,13 +18,10 @@ import { Toast } from "@shared/src/componets/UI/Toast";
 import { H1, Span } from "@shared/src/componets/typography/typography";
 
 export default function CanvasRosterToLadok() {
-  const [kurskod, setKurskod] = useState("I0015N");
+  const [kurskod, setKurskod] = useState("");
   const [modulKod, setModulKod] = useState("");
 
-  const {
-    modules: epokModules,
-    loading: epokLoading,
-  } = useEpokModules(kurskod, true);
+  const {modules: epokModules, loading: epokLoading} = useEpokModules(kurskod, true);
 
   const {
     rows,
@@ -101,11 +102,11 @@ export default function CanvasRosterToLadok() {
   return (
     <div className="min-h-screen">
       <Header>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-left justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="relative">
               <div
-                className="pointer-events-none absolute inset-0 rounded-full bg-white/40 blur-md opacity-60"
+                className="pointer-events-none absolute inset-0 rounded-full bg-white/25 blur-md opacity-60"
                 aria-hidden
               />
               <div className="flex h-20 w-20 items-center justify-center rounded-md bg-[#12365a] shadow-md">
@@ -115,16 +116,17 @@ export default function CanvasRosterToLadok() {
               </div>
             </div>
             <div>
-              <H1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent">
+              <H1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-gray-300 to-white bg-clip-text text-transparent">
                 Canvas Admin WS
               </H1>
-              <Span className="mt-1 text-sm bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent">
+              <Span className="mt-1 text-sm text-white">
                 Snabb registrering av kursbetyg från Canvas till Ladok
-              </Span>
+              </Span> 
             </div>
           </div>
         </div>
       </Header>
+
       <div className="max-w-6xl mx-auto px-6 py-4 space-y-6">
         <Filters
           kurskod={kurskod}
