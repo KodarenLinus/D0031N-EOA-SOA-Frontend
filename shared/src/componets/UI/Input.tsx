@@ -49,6 +49,24 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     )
   }
 )
-
 Input.displayName = 'Input'
-export { Input }
+
+const InputCheckbox = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type = 'checkbox', ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        ref={ref}
+        className={cn(
+          'flex h-4 w-4 rounded-md border border-input bg-background',
+          'placeholder:text-muted-foreground',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
+InputCheckbox.displayName = 'InputCheckbox'
+export { Input, InputCheckbox }

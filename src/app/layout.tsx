@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "@shared/src/styles/tailwind.css";
 
 function ToastProvider({ children }: { children: React.ReactNode }) {
   // Minimal local stand-in for the missing ToastProvider module.
