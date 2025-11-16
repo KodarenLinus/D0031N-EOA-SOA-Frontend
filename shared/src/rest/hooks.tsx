@@ -98,7 +98,7 @@ export function useRoster(kurskod: string, modulkod: string) {
 
         const canvasRoster: CanvasRosterItem[] = Array.isArray(canvasResp)
           ? canvasResp
-          : canvasResp?.['roster'] ?? [];
+          : [canvasResp ?? []];
 
         const cleanCanvas = canvasRoster
           .map((canvas) => ({
