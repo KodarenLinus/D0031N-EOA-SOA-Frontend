@@ -1,22 +1,12 @@
 /**
  * Canvas Schema types
  */
-// --- Canvas assignment type ---
-export type Assignment = {
-  id: number;
-  name: string;
-  scaleHint?: string | null;
-  type?: string | null;
-};
 // --- Canvas roster item type ---
 export type RosterItem = {
   studentId: string;          
   name: string;
 };
-// --- Canvas assignments response ---
-export type CanvasAssignmentsResponse = {
-  assignments: Assignment[];
-};
+
 // --- Canvas roster response ---
 export type CanvasRosterResponse = {
   roster: RosterItem[];
@@ -32,10 +22,7 @@ export type BaseRow = {
   personnummer: string | null;
 };
 // --- Roster table row ---
-export type RosterRow = {
-  studentId: string;
-  name: string;
-  personnummer: string | null;
+export type RosterRow = BaseRow & {
   datum: string;                 
   ladokBetygPreselect: string | null;
   selected: false | true;
@@ -78,6 +65,7 @@ export type LadokResultResponseDto = {
   message: string; 
 };
 
+
 /**
  * Epok Schema types
  */
@@ -87,13 +75,13 @@ export type EpokModule = {
   aktiv: boolean;
 };
 
+
+/**
+ * StudentITS Schema types
+ */
 export type studentitsResponse = {
   studentId: string;
   personnummer: string;
   fornamn: string; 
   efternamn: string
-};
-
-export type studentitsBatchResponse = {
-  getPersonnummerBatch: (studentIds: string[]) => Promise<studentitsResponse[]>;
 };

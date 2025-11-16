@@ -11,7 +11,6 @@ import type {
   CanvasRosterResponse,
   RosterItem,
   BaseRow,
-  studentitsBatchResponse,
   studentitsResponse,
 } from "./schema";
 
@@ -115,12 +114,7 @@ export function useRoster(kurskod: string, modulkod: string) {
         let pnrByStudentId = new Map<string, string>();
 
         try {
-            const apiWithBatch = StudentITSApi as unknown as {
-              getPersonnummerBatch: (studentIds: string[]) => Promise<studentitsResponse[]>;
-            };
-
-            const batch = await apiWithBatch.getPersonnummerBatch(studentIds);
-
+            const batch = (await StudentITSApi.getPersonnummerBatch(studentIds)) as studentitsResponse[];
             pnrByStudentId = new Map(
               batch
                 .map((row) => {
