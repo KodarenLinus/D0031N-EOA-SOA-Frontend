@@ -34,18 +34,15 @@ export const LadokApi = {
         const s = res.status.toLowerCase();
         if (s === "registrerad") {
           ok.push(item);
-        } else if (s === "hinder" && /redan/i.test(res.message)) {
+        } 
+        
+        if (s === "hinder" && /redan/i.test(res.message)) {
           already.push(item);
-        } else {
-          errors.push({ 
-            item, 
-            error: new Error(`${res.status}: ${res.message}`) 
-          });
-        }
-      } catch (e: any) {
+        } 
+      } catch (error) {
         errors.push({ 
           item, 
-          error: e 
+          error: error as Error 
         });
       }
     }

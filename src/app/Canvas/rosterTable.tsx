@@ -42,8 +42,9 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
           });
         }}
         disabled={!rows || rows.length === 0}
-        children="Markera alla"
-      />
+      >
+        Markera alla
+      </Button>
       <Button
           className="mb-4 mr-2"
           onClick={() => {
@@ -54,8 +55,9 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
           });
         }}
         disabled={!rows || rows.length === 0}
-        children="Avmarkera alla"
-      />
+      >
+        Avmarkera alla
+      </Button>
       <div className="rounded-2xl shadow overflow-auto">
         <Table className="min-w-full text-sm">
           <TableHeader className="bg-primary-soft text-white">

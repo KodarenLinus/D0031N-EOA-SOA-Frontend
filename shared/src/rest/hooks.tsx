@@ -134,9 +134,9 @@ export function useRoster(kurskod: string, modulkod: string) {
         }));
 
         setBaseRows(base);
-      } catch (e: any) {
+      } catch (e: studentitsResponse | unknown) {
         if (!cancelled) {
-          setError(e?.message || "Kunde inte hämta roster");
+          setError(e instanceof Error ? e.message : "Kunde inte hämta roster");
         }
       } finally {
         if (!cancelled) {
