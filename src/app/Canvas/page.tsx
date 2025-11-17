@@ -104,7 +104,7 @@ export default function CanvasRosterToLadok() {
               </div>
             </div>
             <div>
-              <H1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-gray-300 to-white bg-clip-text text-transparent">
+              <H1 className="text-3xl font-semibold tracking-tight text-white">
                 Canvas Admin WS
               </H1>
               <Span className="mt-1 text-sm text-white">
