@@ -1,9 +1,7 @@
   import * as React from 'react'
   import { cn } from '@shared/utils'
 
-  export interface HeaderProps extends React.HTMLAttributes<HTMLElement> {}
-
-  const Header = React.forwardRef<HTMLElement, HeaderProps>(
+  const Header = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
     ({ className, ...props }, ref) => (
       <header
         ref={ref}
