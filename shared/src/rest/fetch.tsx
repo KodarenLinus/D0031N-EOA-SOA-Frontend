@@ -1,24 +1,33 @@
-export const getApiBase = () =>
-  (process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") || "http://localhost:8080");
+// Create API base URL for fetch calls
+export const getApiBase = () => ("http://localhost:8080");
 
-function isFormLike(body: any) {
-  return typeof FormData !== "undefined" && body instanceof FormData;
-}
+export async function jsonFetch<T>(
+  url: string, 
+  init: RequestInit = {}
+): Promise<T> {
 
-export async function jsonFetch<T>(url: string, init: RequestInit = {}): Promise<T> {
+  // Set up headers
   const headers =
     init.headers instanceof Headers
       ? Object.fromEntries(init.headers.entries())
       : (init.headers as Record<string, string> | undefined) ?? {};
 
-  headers["Accept"] = headers["Accept"] ?? "application/json";
-
-  if (init.body && !isFormLike(init.body)) {
+  // Content-Type header for non-FormData bodies
+  if (init.body) {
     headers["Content-Type"] = headers["Content-Type"] ?? "application/json; charset=utf-8";
   }
 
-  const res = await fetch(url, { ...init, headers, cache: "no-store" });
+  // Fetch the resource
+  const res = await fetch(
+      url, { 
+      ...init, 
+      headers, 
+      cache: 
+      "no-store" 
+    }
+  );
 
+  // Handle errors
   if (!res.ok) {
     let msg = `${res.status} ${res.statusText}`;
     try {
@@ -26,12 +35,6 @@ export async function jsonFetch<T>(url: string, init: RequestInit = {}): Promise
       if (text) msg += `: ${text}`;
     } catch {}
     throw new Error(msg);
-  }
-
-  if (res.status === 204) return undefined as unknown as T;
-  if (res.status === 404) {
-    console.warn("404 from:", url);
-    throw Object.assign(new Error("Not Found"), { status: 404 });
   }
   return res.json() as Promise<T>;
 }

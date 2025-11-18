@@ -1,42 +1,36 @@
 /**
+ * Shared REST API schema types
+ * Here we define all types used in the various REST clients
+ */
+
+/**
  * Canvas Schema types
  */
-// --- Canvas assignment type ---
-export type Assignment = {
-  id: number;
-  name: string;
-  scaleHint?: string | null;
-  type?: string | null;
-};
 // --- Canvas roster item type ---
-export type RosterItem = {
+export type CanvasRosterItem = {
   studentId: string;          
   name: string;
-};
-// --- Canvas assignments response ---
-export type CanvasAssignmentsResponse = {
-  assignments: Assignment[];
-};
-// --- Canvas roster response ---
-export type CanvasRosterResponse = {
-  roster: RosterItem[];
 };
 
 /**
  * UI-ready roster row
  */
-// --- Roster table row ---
-export type RosterRow = {
+// --- Base row used for merging data sources ---
+export type BaseRow = {
   studentId: string;
   name: string;
   personnummer: string | null;
-  datum: string;                 // YYYY-MM-DD
+};
+// --- Roster table row ---
+export type RosterRow = BaseRow & {
+  datum: string;                 
   ladokBetygPreselect: string | null;
   selected: false | true;
   sent: boolean;
   ladokStatus: string | null;
   registeredAt: string | null;
 };
+
 // --- Roster table data ---
 export type RosterTableData = RosterRow[];
 
@@ -46,38 +40,48 @@ export type RosterTableData = RosterRow[];
  */
 // --- Ladok grades response
 export type LadokRosterItemDto = {
-  kurstillfalleId: number;
   kurskod: string;
-  instanskod: string;
   personnummer: string;
-  fornamn: string;
-  efternamn: string;
   registreringsStatus?: string;
   sent?: boolean;
   ladokStatus?: string;
   ladokBetyg?: string;
-  registeredAt?: string; // ISO
+  datum?: string;
 };
 
+// --- Ladok result request
 export type LadokResultRequestDto = {
   personnummer: string;
   kurskod: string;
   modulkod: string;
-  datum: string; // YYYY-MM-DD
+  datum: string;
   betyg: string;
 };
 
+// --- Ladok result response
 export type LadokResultResponseDto = {
   id: number | null;
-  status: string;  // "registrerad" | "hinder" | ...
-  message: string; // "OK" | ...
+  status: string;  
+  message: string; 
 };
+
+
 /**
  * Epok Schema types
  */
-// --- Epok domain types ---
 export type EpokModule = {
   modulkod: string;
   namn: string;
   aktiv: boolean;
+};
+
+
+/**
+ * StudentITS Schema types
+ */
+export type studentitsResponse = {
+  studentId: string;
+  personnummer: string;
+  fornamn: string; 
+  efternamn: string
 };
