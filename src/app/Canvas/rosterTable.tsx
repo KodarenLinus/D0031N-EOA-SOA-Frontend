@@ -77,11 +77,10 @@ export function RosterTable({ rows, loading, onToggle, onSetGrade, onSetDate }: 
                 </TableCell>
               </TableRow>
             )}
-
             {rows?.map((row) => {
               const sent = isSent(row);
               const disabled = sent || !row.personnummer;
-
+              
               return (
                 <TableRow
                   key={row.studentId}
