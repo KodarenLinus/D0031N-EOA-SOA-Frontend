@@ -1,4 +1,3 @@
-'use client'
 import * as React from 'react'
 import { VariantProps, cva } from 'class-variance-authority'
 import { cn } from '@shared/utils' // assumes you have a cn() util
@@ -9,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-grey text-primary-foreground hover:bg-primary/90 border border',
+        default: 'inline-flex items-center justify-center rounded-2xl bg-primary px-6 py-2 text-sm font-semibold text-white shadow-md hover:opacity-70 active:scale-95 disabled:opacity-50',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         outline: 'border border-input hover:bg-accent hover:text-accent-foreground',
         ghost: 'hover:bg-accent hover:text-accent-foreground',

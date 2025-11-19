@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --ltu-navy: #12365a;    
+  --ltu-navy-soft: #1c4b82; 
+  --ltu-cyan: #22d3ee;     
+  --ltu-cyan-soft: #a5f3fc; 
+  --muted-bg: #f3f4f6;      
+  --muted-fg: #6b7280;  
+  --dark-bordewr: #374151;
+  --light-border: #e5e7eb; 
+  --input: #f9fafb;   
+  --error: #ef4444;
+  --error-foreground: #fef2f2;
+  --error-dark: #b91c1c;
+  --success: #10b981;
+  --success-foreground: #ecfdf5;
+  --success-dark: #047857;
+  --warning: #f59e0b;
+  --warning-foreground: #fffbeb;
+  --warning-dark: #b45309;
+  --info: #3b82f6;
+  --info-foreground: #ecfdf5;
+  --info-dark: #1e40af;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--ltu-navy);
+  --color-primary-soft: var(--ltu-navy-soft);
+  --color-primary-foreground: var(--foreground);
+  --color-accent: var(--ltu-cyan);
+  --color-accent-soft: var(--ltu-cyan-soft);
+  --color-accent-foreground: var(--foreground);
+  --color-muted: var(--muted-bg);
+  --color-muted-foreground: var(--muted-fg);
+  --color-border: var(--dark-border);
+  --color-input: var(--input);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+

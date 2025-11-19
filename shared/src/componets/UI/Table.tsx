@@ -1,9 +1,5 @@
-'use client'
 import * as React from 'react'
-
 import { useReactTable } from '@tanstack/react-table'
-
-// Lägg till om du använder cn-funktionen
 import { cn } from '@shared/utils'
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(

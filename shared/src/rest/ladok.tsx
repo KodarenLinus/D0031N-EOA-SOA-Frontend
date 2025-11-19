@@ -1,24 +1,51 @@
-import { getApiBase } from "./fetch";
+import { jsonFetch, getApiBase } from "./fetch";
+import {
+  LadokRosterItemDto,
+  LadokResultRequestDto,
+  LadokResultResponseDto,
+} from "./schema";
 
 const API = () => getApiBase();
-
-export type LadokRegisterBody = {
-  personnummer: string;
-  kurskod: string;
-  modul: string;
-  datum: string;
-  betyg: string;
-};
+const LADOK_BASE = `${API()}/ladok`;
 
 export const LadokApi = {
-  registerResult: async (payload: LadokRegisterBody) => {
-    const res = await fetch(`${API()}/ladok/results`, {
+  getRoster: (kurskod: string, modulkod: string) =>
+    jsonFetch<LadokRosterItemDto[]>(
+      `${LADOK_BASE}/courses/${encodeURIComponent(kurskod)}/roster?modul=${encodeURIComponent(modulkod)}`
+    ),
+  
+
+  postResult: (body: LadokResultRequestDto) => 
+    jsonFetch<LadokResultResponseDto>(`${LADOK_BASE}/results`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.message || res.statusText);
-    return data;
-  },
-};
+      body: JSON.stringify(body),
+    }),
+  
+
+  postResultsBulk: async (items: LadokResultRequestDto[]) => {
+    const postResult = LadokApi.postResult;
+    const ok: LadokResultRequestDto[] = [];
+    const already: LadokResultRequestDto[] = [];
+    const errors: Array<{ item: LadokResultRequestDto; error: Error }> = [];
+
+    for (const item of items) {
+      try {
+        const res = await postResult(item);
+        const s = res.status.toLowerCase();
+        if (s === "registrerad") {
+          ok.push(item);
+        } 
+        
+        if (s === "hinder" && /redan/i.test(res.message)) {
+          already.push(item);
+        } 
+      } catch (error) {
+        errors.push({ 
+          item, 
+          error: error as Error 
+        });
+      }
+    }
+    return { ok, already, errors };
+  }
+}
